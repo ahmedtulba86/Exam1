@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الاختبار</title>
+<style>
+:root{--bg:#f1f5f9;--card:#fff;--ink:#0f172a;--mut:#64748b;--pri:#1e40af;--ok:#16a34a;--bad:#dc2626;--line:#e2e8f0}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--mut:#94a3b8;--line:#334155}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:17px}
+.w{max-width:640px;margin:0 auto;padding:14px}.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+h1{font-size:20px;margin:0 0 6px}input{width:100%;padding:13px;font-size:18px;border:1px solid var(--line);border-radius:10px;margin:6px 0;background:var(--bg);color:var(--ink);direction:ltr;text-align:center}
+button{font:inherit;border:0;border-radius:10px;padding:13px 16px;background:var(--pri);color:#fff;cursor:pointer}button.s{background:var(--mut)}button:disabled{opacity:.5}
+.big{width:100%}.msg{color:var(--bad);min-height:22px;font-size:15px}.hide{display:none}
+.top{position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+#tm{font-variant-numeric:tabular-nums;font-size:20px}#tm.low{color:var(--bad)}
+.q img{width:100%;border-radius:10px;background:#fff;display:block;user-select:none;-webkit-user-drag:none}
+.ch{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.ch button{background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:22px;font-weight:700;padding:14px 0}.ch button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.nv{display:flex;gap:8px}.nv button{flex:1}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.dots span{width:34px;height:34px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}.dots .a{background:var(--ok);border-color:var(--ok);color:#fff}.dots .cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri)}
+.warn{background:#fef3c7;color:#92400e;border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:8px}
+.res{text-align:center}.res b{font-size:44px;display:block;margin:8px 0}
+</style></head><body><div class="w">
+<div id="s1" class="c"><h1>تسجيل الدخول للاختبار</h1><div style="color:var(--mut);font-size:14px">اكتب رقم تليفونك والكود السري اللي أخدته من المعلم</div>
+<input id="ph" inputmode="numeric" placeholder="رقم التليفون"><input id="cd" inputmode="numeric" placeholder="الكود السري"><div class="msg" id="m1"></div><button class="big" id="go">دخول</button></div>
+<div id="s2" class="c hide"><h1 id="ttl"></h1><p id="who"></p><p id="inf" style="color:var(--mut)"></p><button class="big" id="st">ابدأ الاختبار</button></div>
+<div id="s3" class="hide"><div class="top"><span id="pg"></span><span id="tm"></span></div><div id="wn" class="warn hide"></div><div class="c q"><img id="im" alt=""></div><div class="ch" id="ch"></div><div class="nv"><button class="s" id="pv">السابق</button><button id="nx">التالي</button></div><div class="c" style="margin-top:12px"><div class="dots" id="dt"></div><button class="big" id="fin" style="margin-top:12px;background:var(--ok)">تسليم الاختبار</button></div></div>
+<div id="s4" class="c res hide"><h1>تم التسليم</h1><b id="rs"></b><div id="rp" style="color:var(--mut)"></div></div>
+</div><script>
+var URL_='https://nmcmhlqstkfhsvnyeeod.supabase.co',KEY='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH',IMG=URL_+'/storage/v1/object/public/question-images/';
+var $=function(i){return document.getElementById(i);},E=new URLSearchParams(location.search).get('e');
+var P='',C='',D=null,Ans={},I=0,Lv=0,End=0,Done=false,T=null,SV=null,AR=['a','b','c','d'],AL=['أ','ب','ج','د'];
+function nd(s){return String(s||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/\D/g,'');}
+function rpc(n,b){return fetch(URL_+'/rest/v1/rpc/'+n,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){if(!r.ok)throw new Error('تعذر الاتصال');return r.text().then(function(t){return t?JSON.parse(t):null;});});}
+function show(i){['s1','s2','s3','s4'].forEach(function(x){$(x).classList.toggle('hide',x!==i);});window.scrollTo(0,0);}
+try{$('ph').value=sessionStorage.ph||'';$('cd').value=sessionStorage.cd||'';}catch(e){}
+$('go').onclick=function(){
+  if(!E){$('m1').textContent='رابط الاختبار غير صحيح';return;}
+  P=nd($('ph').value);C=$('cd').value.trim();if(!P||!C){$('m1').textContent='اكتب الرقم والكود';return;}
+  $('go').disabled=true;$('m1').textContent='جارٍ التحقق...';
+  rpc('exam_start',{p_exam:E,p_phone:P,p_code:C}).then(function(r){$('go').disabled=false;
+    if(!r||r.error){$('m1').textContent=(r&&r.error)||'حدث خطأ';return;}
+    try{sessionStorage.ph=P;sessionStorage.cd=C;}catch(e){}
+    D=r;Ans=r.answers||{};SV=Date.parse(r.now)-Date.now();End=Date.parse(r.started_at)+r.duration_min*60000;
+    $('ttl').textContent=r.title;$('who').textContent='الطالب: '+r.name;
+    $('inf').textContent=r.questions.length+' سؤال · المدة '+r.duration_min+' دقيقة'+(Object.keys(Ans).length?' · (استكمال محاولة جارية)':'');
+    show('s2');}).catch(function(e){$('go').disabled=false;$('m1').textContent=e.message;});};
+$('st').onclick=function(){I=0;show('s3');draw();tick();T=setInterval(tick,1000);};
+function left(){return End-(Date.now()+SV);}
+function tick(){var l=left();if(l<=0){$('tm').textContent='00:00';finish(true);return;}var m=Math.floor(l/60000),s=Math.floor(l/1000)%60;$('tm').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;$('tm').className=l<60000?'low':'';}
+function draw(){var q=D.questions[I];$('im').src=IMG+q.img;$('pg').textContent='سؤال '+(I+1)+' من '+D.questions.length;
+  $('ch').innerHTML=AR.map(function(k,i){return '<button class="'+(Ans[q.id]===k?'on':'')+'" onclick="pick(\''+k+'\')">'+AL[i]+'</button>';}).join('');
+  $('dt').innerHTML=D.questions.map(function(x,i){return '<span class="'+(Ans[x.id]?'a':'')+(i===I?' cur':'')+'" onclick="go('+i+')">'+(i+1)+'</span>';}).join('');
+  $('pv').disabled=I===0;$('nx').disabled=I===D.questions.length-1;}
+window.pick=function(k){var id=D.questions[I].id;Ans[id]=Ans[id]===k?undefined:k;if(!Ans[id])delete Ans[id];draw();save();};
+window.go=function(i){I=i;draw();};
+$('pv').onclick=function(){if(I>0){I--;draw();}};$('nx').onclick=function(){if(I<D.questions.length-1){I++;draw();}};
+var svT=null;function save(){clearTimeout(svT);svT=setTimeout(function(){rpc('exam_save',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans}).catch(function(){});},1500);}
+document.addEventListener('visibilitychange',function(){if(document.hidden&&D&&!Done&&!$('s3').classList.contains('hide')){Lv++;var w=$('wn');w.textContent='تم تسجيل خروجك من صفحة الاختبار ('+Lv+' مرة) وسيظهر للمعلم';w.classList.remove('hide');}});
+$('fin').onclick=function(){var un=D.questions.filter(function(q){return !Ans[q.id];}).length;if(confirm(un?'لسه '+un+' سؤال من غير إجابة. تسلّم؟':'تسليم الاختبار؟'))finish(false);};
+function finish(auto){if(Done)return;Done=true;clearInterval(T);$('fin').disabled=true;send(auto);}
+function send(){rpc('exam_submit',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans,p_leaves:Lv}).then(function(r){
+  if(r&&r.error){Done=false;alert(r.error);return;}
+  show('s4');if(r&&r.total!=null){$('rs').textContent=r.score+' / '+r.total;$('rp').textContent=Math.round(r.score/r.total*100)+'%';}else{$('rs').textContent='✓';$('rp').textContent='سيعرض المعلم نتيجتك لاحقًا';}
+  try{sessionStorage.clear();}catch(e){}}).catch(function(){$('s3').classList.remove('hide');var b=$('fin');b.disabled=false;b.textContent='فشل الاتصال، اضغط لإعادة محاولة التسليم';Done=false;});}
+</script></body></html>
