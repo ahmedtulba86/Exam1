@@ -82,13 +82,36 @@ function load(){
 function chart(list){
   var pts=list.filter(function(e){return e.pct!==null;});
   if(pts.length<2)return '';
-  var W=520,H=150,pl=28,pr=10,pt=10,pb=22,iw=W-pl-pr,ih=H-pt-pb;
-  function x(i){return W-pr-(pts.length===1?0:i*iw/(pts.length-1));}  // RTL: oldest on the right
+  var W=520,H=190,pl=30,pr=14,pt=14,pb=30,iw=W-pl-pr,ih=H-pt-pb,n=pts.length;
+  function x(i){return W-pr-(n===1?0:i*iw/(n-1));}  // RTL: oldest on the right
   function y(v){return pt+ih-(Math.max(0,Math.min(100,v))/100*ih);}
-  var d=pts.map(function(e,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(e.pct).toFixed(1);}).join(' ');
-  var dots=pts.map(function(e,i){return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(e.pct).toFixed(1)+'" r="4" fill="'+color(e.pct)+'"><title>'+esc(e.name)+': '+num(e.pct)+'%</title></circle>';}).join('');
-  var grid=[0,50,100].map(function(v){return '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-dasharray="3 3"/><text x="'+(pl-4)+'" y="'+(y(v)+4)+'" font-size="10" text-anchor="end" fill="var(--mute)">'+v+'</text>';}).join('');
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="تطور مستوى الطالب عبر الاختبارات">'+grid+'<path d="'+d+'" fill="none" stroke="var(--pri)" stroke-width="2.5" stroke-linejoin="round"/>'+dots+'</svg>';
+  var grid=[0,25,50,75,100].map(function(v){return '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" '+(v%50?'stroke-dasharray="3 3"':'')+'/><text x="'+(pl-5)+'" y="'+(y(v)+4)+'" font-size="10" text-anchor="end" fill="var(--mute)">'+v+'</text>';}).join('');
+  var path=pts.map(function(e,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(e.pct).toFixed(1);}).join(' ');
+  var gp=pts.filter(function(e){return e.groupAvg!=null;});
+  var gpath=gp.length>=2?pts.map(function(e,i){return e.groupAvg==null?null:{x:x(i),y:y(e.groupAvg)};}).filter(Boolean).map(function(q,i){return (i?'L':'M')+q.x.toFixed(1)+' '+q.y.toFixed(1);}).join(' '):'';
+  var every=n>8?Math.ceil(n/8):1;
+  var xl=pts.map(function(e,i){return (i%every===0||i===n-1)?'<text x="'+x(i).toFixed(1)+'" y="'+(H-10)+'" font-size="10" text-anchor="middle" fill="var(--mute)">'+(i+1)+'</text>':'';}).join('');
+  var dots=pts.map(function(e,i){return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(e.pct).toFixed(1)+'" r="4.5" fill="var(--card)" stroke="'+color(e.pct)+'" stroke-width="3"><title>'+esc(e.name)+': '+num(e.pct)+'%'+(e.groupAvg!=null?' (المجموعة '+num(e.groupAvg)+'%)':'')+'</title></circle>';}).join('');
+  var legend='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px"><span><b style="color:var(--pri)">━</b> الطالب</span>'+(gpath?'<span><b>┅</b> متوسط المجموعة</span>':'')+'<span>الأرقام أسفل الرسم = ترتيب الاختبار</span></div>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="تطور مستوى الطالب مقارنة بالمجموعة">'+grid+(gpath?'<path d="'+gpath+'" fill="none" stroke="var(--mute)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>':'')+'<path d="'+path+'" fill="none" stroke="var(--pri)" stroke-width="2.8" stroke-linejoin="round"/>'+dots+xl+'</svg>'+legend;
+}
+
+function topicsCard(tp){
+  tp=(tp||[]).filter(function(t){return t.total>=2;});
+  if(!tp.length)return '';
+  var weak=tp.filter(function(t){return t.pct<70;}).slice(0,3);
+  var strong=tp.slice().sort(function(a,b){return b.pct-a.pct;}).filter(function(t){return t.pct>=70;}).slice(0,3);
+  function line(t){
+    var diff=t.groupPct!=null?t.pct-t.groupPct:null;
+    return '<div class="row"><div class="n"><b>'+esc(t.name)+'</b><div class="bar"><i style="width:'+Math.max(2,t.pct)+'%;background:'+color(t.pct)+'"></i>'+(t.groupPct!=null?'<u style="position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);right:'+Math.min(98,t.groupPct)+'%" title="متوسط المجموعة"></u>':'')+'</div>'+
+      '<div class="mute" style="font-size:12px;margin-top:4px">'+t.correct+' صح من '+t.total+(diff!==null?' · '+(diff>=3?'أعلى من المجموعة':diff<=-3?'أقل من المجموعة':'قريب من المجموعة'):'')+'</div></div><div class="sc" style="color:'+color(t.pct)+'">'+num(t.pct)+'%</div></div>';
+  }
+  var h='<div class="card"><h2>نقاط القوة والضعف</h2>';
+  if(weak.length)h+='<div style="font-weight:700;color:var(--low);margin:4px 0">يحتاج تركيز</div>'+weak.map(line).join('');
+  if(strong.length)h+='<div style="font-weight:700;color:var(--ok);margin:12px 0 4px">نقاط القوة</div>'+strong.map(line).join('');
+  if(!weak.length&&!strong.length)h+=tp.map(line).join('');
+  h+='<div class="mute" style="margin-top:10px">الخط الأسود على الشريط = متوسط المجموعة. محسوبة من أسئلة الاختبارات الإلكترونية.</div></div>';
+  return h;
 }
 
 function render(d){
@@ -104,16 +127,18 @@ function render(d){
     h+='<div class="kpis"><div class="kpi"><b style="color:'+color(pct)+'">'+num(pct)+'%</b><span>المستوى العام</span></div>'+
        '<div class="kpi"><b>'+(o.rank?'<bdi dir="ltr">'+o.rank+' / '+o.groupSize+'</bdi>':'—')+'</b><span>الترتيب في المجموعة</span></div>'+
        '<div class="kpi"><b>'+(o.groupAvg!=null?num(o.groupAvg)+'%':'—')+'</b><span>متوسط المجموعة</span></div></div>';
+    if(o.groupAvg!=null){var gd=pct-o.groupAvg;h+='<div class="mute" style="margin-top:10px">'+(gd>=3?'▲ أعلى من متوسط المجموعة بـ '+num(gd)+'%':gd<=-3?'▼ أقل من متوسط المجموعة بـ '+num(Math.abs(gd))+'%':'قريب من متوسط المجموعة')+'</div>';}
     if(trend!==null){h+='<div class="mute" style="margin-top:10px">'+(trend>=3?'▲ مستوى في تحسن بين أول وآخر اختبار بمقدار '+num(trend)+'%':trend<=-3?'▼ مستوى في تراجع بين أول وآخر اختبار بمقدار '+num(Math.abs(trend))+'%':'مستوى مستقر بين أول وآخر اختبار')+'</div>';}
   }else{h+='<div class="mute" style="margin-top:10px">لا توجد درجات مسجلة حتى الآن.</div>';}
   h+='</div>';
   var c=chart(ex);
-  if(c)h+='<div class="card"><h2>تطور المستوى</h2>'+c+'<div class="mute">من الأقدم (يمين) إلى الأحدث (يسار)</div></div>';
+  if(c)h+='<div class="card"><h2>تطور المستوى</h2>'+c+'</div>';
+  h+=topicsCard(d.topics);
   if(ex.length){
     h+='<div class="card"><h2>الاختبارات ('+done.length+' من '+ex.length+')</h2>';
     ex.slice().reverse().forEach(function(e){
       if(e.score===null)return;
-      h+='<div class="row"><div class="n"><b>'+esc(e.name)+'</b><div class="bar"><i style="width:'+Math.max(2,Math.min(100,e.pct))+'%;background:'+color(e.pct)+'"></i></div>'+(e.groupAvg!=null?'<div class="mute" style="font-size:12px;margin-top:4px">متوسط المجموعة '+num(e.groupAvg)+'%</div>':'')+'</div>'+
+      h+='<div class="row"><div class="n"><b>'+esc(e.name)+'</b><div class="bar"><i style="width:'+Math.max(2,Math.min(100,e.pct))+'%;background:'+color(e.pct)+'"></i></div>'+(e.groupAvg!=null?'<div class="mute" style="font-size:12px;margin-top:4px">متوسط المجموعة '+num(e.groupAvg)+'% '+(e.pct-e.groupAvg>=3?'<span style="color:var(--ok)">▲ أعلى</span>':e.pct-e.groupAvg<=-3?'<span style="color:var(--low)">▼ أقل</span>':'')+'</div>':'')+'</div>'+
          '<div class="sc" style="color:'+color(e.pct)+'">'+'<bdi dir="ltr">'+num(e.score)+' / '+num(e.max)+'</bdi>'+'<small>'+num(e.pct)+'%</small></div></div>';
     });
     if(pending.length){h+='<div class="mute" style="margin-top:10px">لم تُسجَّل له درجة في: '+pending.map(function(e){return esc(e.name);}).join('، ')+'</div>';}
