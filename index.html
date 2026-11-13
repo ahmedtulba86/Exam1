@@ -17,26 +17,31 @@ button{font:inherit;border:0;border-radius:10px;padding:13px 16px;background:var
 .dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.dots span{width:34px;height:34px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}.dots .a{background:var(--ok);border-color:var(--ok);color:#fff}.dots .cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri)}
 .warn{background:#fef3c7;color:#92400e;border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:8px}
 .res{text-align:center}.res b{font-size:44px;display:block;margin:8px 0}
+.rvh{text-align:center}.rvh b{font-size:40px;display:block;margin:6px 0}.rvf{display:flex;gap:8px;margin-top:10px}.rvf button{flex:1;background:var(--card);color:var(--ink);border:2px solid var(--line)}.rvf button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.rq{border:2px solid var(--line)}.rq.ok{border-color:var(--ok)}.rq.bad{border-color:var(--bad)}.rq .hd{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}.rq .ok_t{color:var(--ok)}.rq .bad_t{color:var(--bad)}
+.rq img{width:100%;border-radius:10px;background:#fff;display:block}.ans{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:16px}.ans div{padding:9px 12px;border-radius:10px;background:var(--bg)}.ans .m_ok{background:#dcfce7;color:#14532d}.ans .m_bad{background:#fee2e2;color:#7f1d1d}.ans .c_ok{background:#dcfce7;color:#14532d}
+.rvb{margin-top:12px}
 </style></head><body><div class="w">
 <div id="s1" class="c"><h1>تسجيل الدخول للاختبار</h1><div style="color:var(--mut);font-size:14px">اكتب رقم تليفونك والكود السري اللي أخدته من المعلم</div>
 <input id="ph" inputmode="numeric" placeholder="رقم التليفون"><input id="cd" inputmode="numeric" placeholder="الكود السري"><div class="msg" id="m1"></div><button class="big" id="go">دخول</button></div>
 <div id="s2" class="c hide"><h1 id="ttl"></h1><p id="who"></p><p id="inf" style="color:var(--mut)"></p><button class="big" id="st">ابدأ الاختبار</button></div>
 <div id="s3" class="hide"><div class="top"><span id="pg"></span><span id="tm"></span></div><div id="wn" class="warn hide"></div><div class="c q"><img id="im" alt=""></div><div class="ch" id="ch"></div><div class="nv"><button class="s" id="pv">السابق</button><button id="nx">التالي</button></div><div class="c" style="margin-top:12px"><div class="dots" id="dt"></div><button class="big" id="fin" style="margin-top:12px;background:var(--ok)">تسليم الاختبار</button></div></div>
-<div id="s4" class="c res hide"><h1>تم التسليم</h1><b id="rs"></b><div id="rp" style="color:var(--mut)"></div></div>
+<div id="s4" class="c res hide"><h1>تم التسليم</h1><b id="rs"></b><div id="rp" style="color:var(--mut)"></div><button class="big rvb hide" id="rvgo">راجع أخطاءك</button></div>
+<div id="s5" class="hide"><div class="c rvh"><h1 id="rvt"></h1><b id="rvs"></b><div id="rvp" style="color:var(--mut)"></div><div class="rvf"><button id="rvall" class="on"></button><button id="rverr"></button></div></div><div id="rvl"></div></div>
 </div><script>
 var URL_='https://nmcmhlqstkfhsvnyeeod.supabase.co',KEY='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH',IMG=URL_+'/storage/v1/object/public/question-images/';
 var $=function(i){return document.getElementById(i);},E=new URLSearchParams(location.search).get('e');
 var P='',C='',D=null,Ans={},I=0,Lv=0,End=0,Done=false,T=null,SV=null,AR=['a','b','c','d'],AL=['أ','ب','ج','د'];
 function nd(s){return String(s||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/\D/g,'');}
 function rpc(n,b){return fetch(URL_+'/rest/v1/rpc/'+n,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){if(!r.ok)throw new Error('تعذر الاتصال');return r.text().then(function(t){return t?JSON.parse(t):null;});});}
-function show(i){['s1','s2','s3','s4'].forEach(function(x){$(x).classList.toggle('hide',x!==i);});window.scrollTo(0,0);}
+function show(i){['s1','s2','s3','s4','s5'].forEach(function(x){$(x).classList.toggle('hide',x!==i);});window.scrollTo(0,0);}
 try{$('ph').value=sessionStorage.ph||'';$('cd').value=sessionStorage.cd||'';}catch(e){}
 $('go').onclick=function(){
   if(!E){$('m1').textContent='رابط الاختبار غير صحيح';return;}
   P=nd($('ph').value);C=$('cd').value.trim();if(!P||!C){$('m1').textContent='اكتب الرقم والكود';return;}
   $('go').disabled=true;$('m1').textContent='جارٍ التحقق...';
   rpc('exam_start',{p_exam:E,p_phone:P,p_code:C}).then(function(r){$('go').disabled=false;
-    if(!r||r.error){$('m1').textContent=(r&&r.error)||'حدث خطأ';return;}
+    if(!r||r.error){var er=(r&&r.error)||'حدث خطأ';if(er.indexOf('بيانات الدخول')>=0){$('m1').textContent=er;return;}tryReview(er);return;}
     try{sessionStorage.ph=P;sessionStorage.cd=C;}catch(e){}
     D=r;Ans=r.answers||{};SV=Date.parse(r.now)-Date.now();End=Date.parse(r.started_at)+r.duration_min*60000;
     $('ttl').textContent=r.title;$('who').textContent='الطالب: '+r.name;
@@ -59,5 +64,48 @@ function finish(auto){if(Done)return;Done=true;clearInterval(T);$('fin').disable
 function send(){rpc('exam_submit',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans,p_leaves:Lv}).then(function(r){
   if(r&&r.error){Done=false;alert(r.error);return;}
   show('s4');if(r&&r.total!=null){$('rs').textContent=r.score+' / '+r.total;$('rp').textContent=Math.round(r.score/r.total*100)+'%';}else{$('rs').textContent='✓';$('rp').textContent='سيعرض المعلم نتيجتك لاحقًا';}
-  try{sessionStorage.clear();}catch(e){}}).catch(function(){$('s3').classList.remove('hide');var b=$('fin');b.disabled=false;b.textContent='فشل الاتصال، اضغط لإعادة محاولة التسليم';Done=false;});}
+  try{sessionStorage.clear();}catch(e){}offerReview();}).catch(function(){$('s3').classList.remove('hide');var b=$('fin');b.disabled=false;b.textContent='فشل الاتصال، اضغط لإعادة محاولة التسليم';Done=false;});}
+
+function nk(x){if(x===null||x===undefined||x==='')return '';x=String(x).trim();if(/^[0-3]$/.test(x))return AR[+x];var i=AL.indexOf(x);if(i>=0)return AR[i];return x.toLowerCase();}
+function lt(k){var i=AR.indexOf(k);return i>=0?AL[i]:k;}
+function imgSrc(p){return /^https?:/.test(p)?p:IMG+p;}
+var RV=null;
+function tryReview(er){
+  $('m1').textContent='جارٍ التحقق من تسليمك السابق...';$('go').disabled=true;
+  rpc('exam_review',{p_exam:E,p_phone:P,p_code:C}).then(function(v){$('go').disabled=false;
+    if(v&&!v.error){try{sessionStorage.ph=P;sessionStorage.cd=C;}catch(e){}showReview(v);return;}
+    var e2=(v&&v.error)||'';
+    if(e2.indexOf('المراجعة غير متاحة')>=0)$('m1').textContent='الاختبار مغلق، والمراجعة لسه ما اتفتحتش من المعلم. جرّب تدخل تاني بعد ما المعلم يفتحها.';
+    else $('m1').textContent=er;
+  }).catch(function(){$('go').disabled=false;$('m1').textContent=er;});
+}
+function offerReview(){
+  rpc('exam_review',{p_exam:E,p_phone:P,p_code:C}).then(function(v){
+    if(v&&!v.error){RV=v;var b=$('rvgo');b.classList.remove('hide');b.onclick=function(){showReview(RV);};}
+  }).catch(function(){});
+}
+function showReview(v){
+  RV=v;var items=v.items||[];
+  var wrong=items.filter(function(it){return nk(it.mine)!==nk(it.correct);}).length;
+  $('rvt').textContent=v.title||'مراجعة الاختبار';
+  $('rvs').textContent=v.score+' / '+v.total;
+  $('rvp').textContent=(v.total?Math.round(v.score/v.total*100):0)+'%';
+  $('rvall').textContent='كل الأسئلة ('+items.length+')';
+  $('rverr').textContent='أخطائي فقط ('+wrong+')';
+  $('rvall').onclick=function(){drawReview(false);};$('rverr').onclick=function(){drawReview(true);};
+  drawReview(false);show('s5');
+}
+function drawReview(onlyErr){
+  var items=(RV&&RV.items)||[],h='',shown=0;
+  $('rvall').className=onlyErr?'':'on';$('rverr').className=onlyErr?'on':'';
+  items.forEach(function(it,i){
+    var m=nk(it.mine),c=nk(it.correct),ok=m&&m===c;
+    if(onlyErr&&ok)return;shown++;
+    h+='<div class="c rq '+(ok?'ok':'bad')+'"><div class="hd"><span>سؤال '+(i+1)+'</span><span class="'+(ok?'ok_t':'bad_t')+'">'+(ok?'✓ إجابة صحيحة':(m?'✗ إجابة خاطئة':'✗ بدون إجابة'))+'</span></div>'+
+      '<img src="'+imgSrc(it.img||'')+'" alt="">'+
+      '<div class="ans"><div class="'+(ok?'m_ok':'m_bad')+'">إجابتك: '+(m?lt(m):'لم تجب')+'</div>'+(ok?'':'<div class="c_ok">الإجابة الصحيحة: '+lt(c)+'</div>')+'</div></div>';
+  });
+  if(!shown)h='<div class="c" style="text-align:center">مفيش أخطاء، أحسنت! 🎉</div>';
+  $('rvl').innerHTML=h;window.scrollTo(0,0);
+}
 </script></body></html>
