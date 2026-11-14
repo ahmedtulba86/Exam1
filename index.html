@@ -20,7 +20,7 @@ button{font:inherit;border:0;border-radius:10px;padding:13px 16px;background:var
 .rvh{text-align:center}.rvh b{font-size:40px;display:block;margin:6px 0}.rvf{display:flex;gap:8px;margin-top:10px}.rvf button{flex:1;background:var(--card);color:var(--ink);border:2px solid var(--line)}.rvf button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
 .rq{border:2px solid var(--line)}.rq.ok{border-color:var(--ok)}.rq.bad{border-color:var(--bad)}.rq .hd{display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px}.rq .ok_t{color:var(--ok)}.rq .bad_t{color:var(--bad)}
 .rq img{width:100%;border-radius:10px;background:#fff;display:block}.ans{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:16px}.ans div{padding:9px 12px;border-radius:10px;background:var(--bg)}.ans .m_ok{background:#dcfce7;color:#14532d}.ans .m_bad{background:#fee2e2;color:#7f1d1d}.ans .c_ok{background:#dcfce7;color:#14532d}
-.rvb{margin-top:12px}
+.rvb{margin-top:12px}.ex{margin-top:10px;padding:10px 12px;border-radius:10px;background:#fef9c3;color:#713f12;font-size:15px;white-space:pre-wrap}
 </style></head><body><div class="w">
 <div id="s1" class="c"><h1>تسجيل الدخول للاختبار</h1><div style="color:var(--mut);font-size:14px">اكتب رقم تليفونك والكود السري اللي أخدته من المعلم</div>
 <input id="ph" inputmode="numeric" placeholder="رقم التليفون"><input id="cd" inputmode="numeric" placeholder="الكود السري"><div class="msg" id="m1"></div><button class="big" id="go">دخول</button></div>
@@ -43,7 +43,7 @@ $('go').onclick=function(){
   rpc('exam_start',{p_exam:E,p_phone:P,p_code:C}).then(function(r){$('go').disabled=false;
     if(!r||r.error){var er=(r&&r.error)||'حدث خطأ';if(er.indexOf('بيانات الدخول')>=0){$('m1').textContent=er;return;}tryReview(er);return;}
     try{sessionStorage.ph=P;sessionStorage.cd=C;}catch(e){}
-    D=r;Ans=r.answers||{};SV=Date.parse(r.now)-Date.now();End=Date.parse(r.started_at)+r.duration_min*60000;
+    D=r;Ans=r.answers||{};try{var lc=JSON.parse(localStorage.getItem('ans_'+r.attempt)||'{}'),chg=false;Object.keys(lc).forEach(function(k){if(!Ans[k]){Ans[k]=lc[k];chg=true;}});if(chg)setTimeout(save,500);}catch(e){}SV=Date.parse(r.now)-Date.now();End=Date.parse(r.started_at)+r.duration_min*60000;
     $('ttl').textContent=r.title;$('who').textContent='الطالب: '+r.name;
     $('inf').textContent=r.questions.length+' سؤال · المدة '+r.duration_min+' دقيقة'+(Object.keys(Ans).length?' · (استكمال محاولة جارية)':'');
     show('s2');}).catch(function(e){$('go').disabled=false;$('m1').textContent=e.message;});};
@@ -54,22 +54,23 @@ function draw(){var q=D.questions[I];$('im').src=IMG+q.img;$('pg').textContent='
   $('ch').innerHTML=AR.map(function(k,i){return '<button class="'+(Ans[q.id]===k?'on':'')+'" onclick="pick(\''+k+'\')">'+AL[i]+'</button>';}).join('');
   $('dt').innerHTML=D.questions.map(function(x,i){return '<span class="'+(Ans[x.id]?'a':'')+(i===I?' cur':'')+'" onclick="go('+i+')">'+(i+1)+'</span>';}).join('');
   $('pv').disabled=I===0;$('nx').disabled=I===D.questions.length-1;}
-window.pick=function(k){var id=D.questions[I].id;Ans[id]=Ans[id]===k?undefined:k;if(!Ans[id])delete Ans[id];draw();save();};
+window.pick=function(k){var id=D.questions[I].id;Ans[id]=Ans[id]===k?undefined:k;if(!Ans[id])delete Ans[id];draw();try{localStorage.setItem('ans_'+D.attempt,JSON.stringify(Ans));}catch(e){}save();};
 window.go=function(i){I=i;draw();};
 $('pv').onclick=function(){if(I>0){I--;draw();}};$('nx').onclick=function(){if(I<D.questions.length-1){I++;draw();}};
-var svT=null;function save(){clearTimeout(svT);svT=setTimeout(function(){rpc('exam_save',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans}).catch(function(){});},1500);}
+var svT=null;function save(){clearTimeout(svT);svT=setTimeout(function(){rpc('exam_save',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans}).catch(function(){svT=setTimeout(save,8000);});},1500);}
+window.addEventListener('beforeunload',function(e){if(D&&!Done&&!$('s3').classList.contains('hide')){e.preventDefault();e.returnValue='';}});
 document.addEventListener('visibilitychange',function(){if(document.hidden&&D&&!Done&&!$('s3').classList.contains('hide')){Lv++;var w=$('wn');w.textContent='تم تسجيل خروجك من صفحة الاختبار ('+Lv+' مرة) وسيظهر للمعلم';w.classList.remove('hide');}});
 $('fin').onclick=function(){var un=D.questions.filter(function(q){return !Ans[q.id];}).length;if(confirm(un?'لسه '+un+' سؤال من غير إجابة. تسلّم؟':'تسليم الاختبار؟'))finish(false);};
 function finish(auto){if(Done)return;Done=true;clearInterval(T);$('fin').disabled=true;send(auto);}
 function send(){rpc('exam_submit',{p_attempt:D.attempt,p_phone:P,p_code:C,p_answers:Ans,p_leaves:Lv}).then(function(r){
   if(r&&r.error){Done=false;alert(r.error);return;}
   show('s4');if(r&&r.total!=null){$('rs').textContent=r.score+' / '+r.total;$('rp').textContent=Math.round(r.score/r.total*100)+'%';}else{$('rs').textContent='✓';$('rp').textContent='سيعرض المعلم نتيجتك لاحقًا';}
-  try{sessionStorage.clear();}catch(e){}offerReview();}).catch(function(){$('s3').classList.remove('hide');var b=$('fin');b.disabled=false;b.textContent='فشل الاتصال، اضغط لإعادة محاولة التسليم';Done=false;});}
+  try{sessionStorage.clear();localStorage.removeItem('ans_'+D.attempt);}catch(e){}offerReview();}).catch(function(){$('s3').classList.remove('hide');var b=$('fin');b.disabled=false;b.textContent='فشل الاتصال، اضغط لإعادة محاولة التسليم';Done=false;});}
 
 function nk(x){if(x===null||x===undefined||x==='')return '';x=String(x).trim();if(/^[0-3]$/.test(x))return AR[+x];var i=AL.indexOf(x);if(i>=0)return AR[i];return x.toLowerCase();}
 function lt(k){var i=AR.indexOf(k);return i>=0?AL[i]:k;}
 function imgSrc(p){return /^https?:/.test(p)?p:IMG+p;}
-var RV=null;
+var RV=null;function esc_(x){var d=document.createElement('div');d.textContent=x;return d.innerHTML;}
 function tryReview(er){
   $('m1').textContent='جارٍ التحقق من تسليمك السابق...';$('go').disabled=true;
   rpc('exam_review',{p_exam:E,p_phone:P,p_code:C}).then(function(v){$('go').disabled=false;
@@ -103,7 +104,7 @@ function drawReview(onlyErr){
     if(onlyErr&&ok)return;shown++;
     h+='<div class="c rq '+(ok?'ok':'bad')+'"><div class="hd"><span>سؤال '+(i+1)+'</span><span class="'+(ok?'ok_t':'bad_t')+'">'+(ok?'✓ إجابة صحيحة':(m?'✗ إجابة خاطئة':'✗ بدون إجابة'))+'</span></div>'+
       '<img src="'+imgSrc(it.img||'')+'" alt="">'+
-      '<div class="ans"><div class="'+(ok?'m_ok':'m_bad')+'">إجابتك: '+(m?lt(m):'لم تجب')+'</div>'+(ok?'':'<div class="c_ok">الإجابة الصحيحة: '+lt(c)+'</div>')+'</div></div>';
+      '<div class="ans"><div class="'+(ok?'m_ok':'m_bad')+'">إجابتك: '+(m?lt(m):'لم تجب')+'</div>'+(ok?'':'<div class="c_ok">الإجابة الصحيحة: '+lt(c)+'</div>')+'</div>'+(it.exp?'<div class="ex">💡 الشرح:\n'+esc_(it.exp)+'</div>':'')+'</div>';
   });
   if(!shown)h='<div class="c" style="text-align:center">مفيش أخطاء، أحسنت! 🎉</div>';
   $('rvl').innerHTML=h;window.scrollTo(0,0);
