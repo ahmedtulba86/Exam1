@@ -1,90 +1,172 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#173b78"><title>بوابة الطالب | عصير الكتب</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بوابة الطالب | عصير الكتب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{font-family:Tahoma,Arial,sans-serif;color:#172033;background:#f3f6fb;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#eaf1ff,#f8fafc 55%,#e8f4f2)}button,input{font:inherit}button{border:0;border-radius:10px;background:#1d4e9e;color:white;padding:12px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.secondary{background:#e8eef8;color:#173b78}.danger{background:#b42332}.wrap{width:min(960px,100%);margin:auto;padding:22px 14px 40px}.brand{text-align:center;margin:16px 0 22px}.brand .logo{width:58px;height:58px;border-radius:18px;background:#173b78;color:#fff;display:grid;place-items:center;font-size:29px;margin:auto;box-shadow:0 8px 24px #173b7830}.brand h1{font-size:25px;margin:10px 0 4px;color:#173b78}.brand p{margin:0;color:#64748b;font-size:13px}.panel{background:#fff;border:1px solid #e4eaf3;border-radius:18px;padding:20px;box-shadow:0 14px 40px #23395b0d}.login{max-width:470px;margin:0 auto}.login h2{margin:0 0 6px}.muted{color:#64748b;font-size:13px;line-height:1.7}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;outline:none}.field input:focus{border-color:#3974c7;box-shadow:0 0 0 3px #3974c71a}.error{color:#b42332;font-size:13px;min-height:22px;margin-top:8px}.legacy{margin-top:15px;border-top:1px solid #e8edf4;padding-top:12px}.legacy summary{cursor:pointer;color:#34598e;font-weight:700;font-size:13px}.legacybox{background:#f8fafc;padding:10px;border-radius:12px;margin-top:10px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tabs button{padding:8px 12px;font-size:12px}.tabs button.active{background:#173b78}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.metric{border:1px solid #e7edf5;border-radius:13px;padding:14px;background:#fbfdff;min-width:0}.metric small{color:#64748b;display:block;margin-bottom:7px}.metric strong{font-size:23px;color:#173b78;overflow-wrap:anywhere}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.top h2{margin:0;color:#173b78}.tag{display:inline-block;border-radius:999px;background:#eaf2ff;color:#214d8c;padding:5px 9px;font-size:12px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:440px}th,td{text-align:right;padding:11px 9px;border-bottom:1px solid #e8edf4;font-size:13px}th{background:#f7f9fc;color:#475569;white-space:nowrap}.empty{padding:18px;border:1px dashed #cbd5e1;border-radius:12px;color:#64748b;text-align:center;font-size:13px;margin-top:12px}.foot{text-align:center;color:#94a3b8;font-size:11px;margin:22px 0 0}.hide{display:none!important}@media(max-width:680px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:15px}.brand h1{font-size:22px}.metric strong{font-size:20px}}
+:root{--p:#1e40af;--bg:#f1f5f9;--c:#fff;--t:#1e293b;--ok:#16a34a;--bad:#dc2626;--m:#64748b;--b:#e2e8f0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Cairo,Tahoma,Arial,sans-serif;background:var(--bg);color:var(--t);line-height:1.5}
+.w{max-width:760px;margin:0 auto;padding:10px}
+.card{background:var(--c);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #0f172a12}
+h2,h3{margin:0 0 8px}
+input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin:5px 0 10px}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:11px 16px;background:var(--p);color:#fff;cursor:pointer;min-height:44px}
+button.g{background:#e2e8f0;color:#334155}button:disabled{opacity:.5}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tabs{display:flex;gap:6px;margin:10px 0;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button{flex:1;background:#e2e8f0;color:#475569;padding:10px 4px;font-size:13px}
+.tabs button.on{background:var(--p);color:#fff}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.m{color:var(--m);font-size:13px}.err{color:var(--bad);min-height:22px;font-size:14px}
+.st{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.st div{background:#eff6ff;border-radius:12px;padding:10px;text-align:center}.st b{display:block;font-size:22px;color:var(--p)}
+.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.hi{background:#dcfce7;color:#166534}.mid{background:#fef3c7;color:#92400e}.lo{background:#fee2e2;color:#991b1b}
+.q img{max-width:100%;border-radius:10px;border:1px solid var(--b);display:block;margin:6px 0}
+.ch{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.ch button{background:#f1f5f9;color:#334155;border:2px solid #cbd5e1;font-size:18px}
+.ch button.s{background:var(--p);color:#fff;border-color:var(--p)}
+.tm{position:sticky;top:0;background:#fff;padding:8px 12px;border-radius:12px;box-shadow:0 2px 8px #0002;z-index:6;font-weight:800}
+.wr{border-right:4px solid var(--bad)}.rt{border-right:4px solid var(--ok)}
+.ex{background:#eff6ff;border-radius:10px;padding:9px;margin-top:8px;font-size:14px}
 </style>
 </head>
-<body>
-<main class="wrap">
-  <header class="brand"><div class="logo">🎓</div><h1>عصير الكتب</h1><p>بوابة الطالب — حسابك التعليمي في مكان واحد</p></header>
-  <section id="loginPanel" class="panel login">
-    <h2>تسجيل دخول الطالب</h2><p class="muted">اكتب اسمك كما هو مسجل لدى المعلم، ثم أدخل كودك الشخصي.</p>
-    <form id="mainForm" autocomplete="on">
-      <div class="field"><label for="studentName">اسم الطالب</label><input id="studentName" name="name" autocomplete="name" required placeholder="الاسم المسجل في المنصة"></div>
-      <div class="field"><label for="studentCode">الكود الشخصي</label><input id="studentCode" name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="أدخل كود الدخول" maxlength="24"></div>
-      <button id="mainLoginBtn" type="submit" style="width:100%">دخول إلى حسابي</button>
-    </form>
-    <details class="legacy"><summary>لديّ بيانات دخول قديمة</summary>
-      <div class="legacybox">
-        <div class="tabs"><button type="button" class="active" data-mode="account">اسم المستخدم وكلمة المرور</button><button type="button" class="secondary" data-mode="phone">الهاتف والكود القديم</button></div>
-        <form id="legacyAccountForm"><div class="field"><label for="oldUsername">اسم المستخدم</label><input id="oldUsername" autocomplete="username"></div><div class="field"><label for="oldPassword">كلمة المرور</label><input id="oldPassword" type="password" autocomplete="current-password"></div><button type="submit" style="width:100%">دخول بالبيانات القديمة</button></form>
-        <form id="legacyPhoneForm" class="hide"><div class="field"><label for="oldPhone">رقم الهاتف المسجل</label><input id="oldPhone" inputmode="tel" autocomplete="tel"></div><div class="field"><label for="oldPhoneCode">الكود القديم</label><input id="oldPhoneCode" autocomplete="one-time-code"></div><button type="submit" style="width:100%">دخول بالهاتف والكود</button></form>
-      </div>
-    </details>
-    <div id="loginError" class="error" role="alert"></div>
-    <p class="muted">إذا لم يعمل الكود، تواصل مع المعلم للتأكد من تفعيل حسابك أو إصدار كود جديد.</p>
-  </section>
-
-  <section id="dashboard" class="hide">
-    <div class="panel">
-      <div class="top"><div><span class="tag">حساب الطالب</span><h2 id="welcome" style="margin-top:8px">مرحبًا</h2><div id="studentGroup" class="muted"></div></div><button id="logoutBtn" class="danger" type="button">تسجيل الخروج</button></div>
-      <div class="grid">
-        <div class="metric"><small>متوسط الدرجات</small><strong id="mAverage">—</strong></div>
-        <div class="metric"><small>الاختبارات المرصودة</small><strong id="mTaken">—</strong></div>
-        <div class="metric"><small>ترتيبك في المجموعة</small><strong id="mRank">—</strong></div>
-        <div class="metric"><small>متوسط المجموعة</small><strong id="mGroupAverage">—</strong></div>
-      </div>
-      <div id="publishedNotice" class="empty hide">لم ينشر المعلم نتائجك بعد. ستظهر هنا بمجرد إتاحتها.</div>
-    </div>
-    <div class="panel" style="margin-top:13px"><h3 style="margin:0 0 12px;color:#173b78">سجل الدرجات</h3><div id="gradesArea"></div></div>
-    <div class="panel" style="margin-top:13px"><h3 style="margin:0 0 12px;color:#173b78">مؤشرات أدائك</h3><div id="topicsArea" class="muted">لا توجد تحليلات منشورة حاليًا.</div></div>
-  </section>
-  <footer class="foot">عصير الكتب · بوابة الطالب الآمنة</footer>
-</main>
+<body><div class="w" id="app"></div>
 <script>
-(function(){
-'use strict';
-var SB_URL='https://nmcmhlqstkfhsvnyeeod.supabase.co';
-var SB_KEY='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH';
-var SESSION_KEY='aseer_student_session_v1';
-var $=function(id){return document.getElementById(id);};
-var token='';
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function headers(){return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};}
-function rpc(name,args){return fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:headers(),body:JSON.stringify(args)}).then(function(r){return r.text().then(function(t){var j={};try{j=t?JSON.parse(t):{};}catch(e){}if(!r.ok)throw new Error(j.message||j.error||t||('HTTP '+r.status));return j;});});}
-function setError(msg){$('loginError').textContent=msg||'';}
-function setBusy(b){$('mainLoginBtn').disabled=!!b;$('mainLoginBtn').textContent=b?'جارٍ التحقق...':'دخول إلى حسابي';}
-function storeSession(r){token=r.token;try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:r.token,expires_at:r.expires_at}));}catch(e){}}
-function clearSession(){token='';try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
-function showLogin(){ $('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide'); }
-function showDashboard(){ $('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide'); }
-function pct(v){return v===null||v===undefined||!isFinite(Number(v))?'—':Number(v).toFixed(1)+'%';}
-function render(data){
-  var d=data.data||{},o=d.overall||{},exams=Array.isArray(d.exams)?d.exams:[];
-  $('welcome').textContent='مرحبًا، '+(d.name||data.name||'طالبنا');
-  $('studentGroup').textContent=d.group?'المجموعة: '+d.group:'حسابك مرتبط بسجل الطالب رقم '+data.student_id;
-  $('mAverage').textContent=pct(o.pct);
-  $('mTaken').textContent=(o.taken==null?'0':o.taken)+' / '+(o.total==null?'—':o.total);
-  $('mRank').textContent=o.rank?o.rank+' من '+(o.groupSize||'—'):'—';
-  $('mGroupAverage').textContent=pct(o.groupAvg);
-  $('publishedNotice').classList.toggle('hide',!!data.has_published_data);
-  if(exams.length){$('gradesArea').innerHTML='<div class="tablewrap"><table><thead><tr><th>التقييم</th><th>الدرجة</th><th>النسبة</th><th>متوسط المجموعة</th></tr></thead><tbody>'+exams.map(function(x){return '<tr><td>'+esc(x.name)+'</td><td>'+(x.score==null?'لم تُرصد':esc(x.score)+' / '+esc(x.max))+'</td><td>'+pct(x.pct)+'</td><td>'+pct(x.groupAvg)+'</td></tr>';}).join('')+'</tbody></table></div>';}
-  else $('gradesArea').innerHTML='<div class="empty">لا توجد درجات منشورة حاليًا.</div>';
-  var topics=Array.isArray(d.topics)?d.topics:[];
-  $('topicsArea').innerHTML=topics.length?'<div class="tablewrap"><table><thead><tr><th>الموضوع</th><th>إجابات صحيحة</th><th>الإجمالي</th><th>نسبة الإتقان</th></tr></thead><tbody>'+topics.map(function(t){return '<tr><td>'+esc(t.name)+'</td><td>'+esc(t.correct)+'</td><td>'+esc(t.total)+'</td><td>'+pct(t.pct)+'</td></tr>';}).join('')+'</tbody></table></div>':'لا توجد تحليلات منشورة حاليًا.';
-  showDashboard();
+var U='https://nmcmhlqstkfhsvnyeeod.supabase.co',K='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH';
+var L={a:'أ',b:'ب',c:'ج',d:'د'},S={me:null,d:null,tab:'new',rev:{},tm:null},$=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function rpc(n,b){return fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(j&&j.message&&!j.error)throw new Error(j.message);return j})}
+function img(p){return !p?'':/^(https?:|data:)/.test(p)?p:U+'/storage/v1/object/public/question-images/'+p}
+function dt(x){try{return new Date(x).toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
+function pc(r){return r.total>0?Math.round(r.score/r.total*100):0}
+function bd(p){return '<span class="bd '+(p>=85?'hi':p>=60?'mid':'lo')+'">'+p+'%</span>'}
+function sv(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function ld(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+
+/* ---------- دخول ---------- */
+function loginView(msg){
+  $('app').innerHTML='<div class="card" style="margin-top:8vh"><div style="text-align:center;font-size:42px">🎓</div><h2 style="text-align:center;color:var(--p)">عصير الكتب — بوابة الطالب</h2>'+
+  '<label>الاسم أو رقم التليفون</label><input id="lid" autocomplete="username" placeholder="اكتب اسمك الثلاثي أو رقم تليفونك">'+
+  '<label>الكود</label><input id="lcode" dir="ltr" autocomplete="current-password" placeholder="كود الطالب">'+
+  '<div class="err" id="lerr">'+(msg||'')+'</div><button id="lgo" style="width:100%">دخول</button></div>';
+  $('lgo').onclick=doLogin;$('lcode').onkeydown=function(e){if(e.key==='Enter')doLogin()};
 }
-function loadMe(){if(!token){showLogin();return Promise.resolve(false);}return rpc('student_portal_me',{p_token:token}).then(function(r){if(!r||!r.ok){clearSession();showLogin();setError(r&&r.error||'انتهت الجلسة. سجّل الدخول مرة أخرى.');return false;}render(r);return true;}).catch(function(e){clearSession();showLogin();setError('تعذر الاتصال بالبوابة: '+e.message);return false;});}
-function login(args){setError('');setBusy(true);return rpc('student_portal_login',args).then(function(r){if(!r||!r.ok)throw new Error(r&&r.error||'بيانات الدخول غير صحيحة');storeSession(r);return loadMe();}).catch(function(e){setError(e.message||'تعذر تسجيل الدخول.');}).finally(function(){setBusy(false);});}
-$('mainForm').addEventListener('submit',function(e){e.preventDefault();var name=$('studentName').value.trim(),code=$('studentCode').value.trim();if(!name||!code){setError('اكتب الاسم والكود.');return;}login({p_name:name,p_code:code,p_username:null,p_password:null,p_phone:null,p_legacy_code:null});});
-$('legacyAccountForm').addEventListener('submit',function(e){e.preventDefault();var u=$('oldUsername').value.trim(),p=$('oldPassword').value;if(!u||!p){setError('اكتب اسم المستخدم وكلمة المرور.');return;}login({p_name:null,p_code:null,p_username:u,p_password:p,p_phone:null,p_legacy_code:null});});
-$('legacyPhoneForm').addEventListener('submit',function(e){e.preventDefault();var p=$('oldPhone').value.trim(),c=$('oldPhoneCode').value.trim();if(!p||!c){setError('اكتب رقم الهاتف والكود القديم.');return;}login({p_name:null,p_code:null,p_username:null,p_password:null,p_phone:p,p_legacy_code:c});});
-document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);x.classList.toggle('secondary',x!==b);});$('legacyAccountForm').classList.toggle('hide',b.dataset.mode!=='account');$('legacyPhoneForm').classList.toggle('hide',b.dataset.mode!=='phone');setError('');});});
-$('logoutBtn').addEventListener('click',function(){var old=token;clearSession();showLogin();$('studentName').value='';$('studentCode').value='';setError('تم تسجيل الخروج.');if(old)rpc('student_portal_logout',{p_token:old}).catch(function(){});});
-try{var saved=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');if(saved&&saved.token&&(!saved.expires_at||new Date(saved.expires_at).getTime()>Date.now())){token=saved.token;loadMe();}else{clearSession();showLogin();}}catch(e){clearSession();showLogin();}
-})();
+function doLogin(){
+  var id=$('lid').value.trim(),code=$('lcode').value.trim();
+  if(!id||!code){$('lerr').textContent='اكتب بياناتك كاملة';return}
+  $('lgo').disabled=true;$('lerr').textContent='';
+  var digits=id.replace(/\D/g,'');
+  rpc('portal_login',{p_id:id,p_code:code}).catch(function(){
+    /* لو دالة الدخول بالاسم لسه متركبتش: الدخول بالتليفون يشتغل مباشرة */
+    return digits.length>=7?{phone:digits,code:code}:{error:'الدخول بالاسم يحتاج تشغيل ملف portal_setup.sql مرة واحدة'};
+  }).then(function(r){
+    if(r.error){$('lerr').textContent=r.error;$('lgo').disabled=false;return}
+    S.me={phone:r.phone,code:r.code,name:r.name};
+    return load().then(function(){sv('pt_me',S.me)});
+  }).catch(function(e){$('lerr').textContent='حصل خطأ في الاتصال، حاول تاني';$('lgo').disabled=false});
+}
+function load(){
+  return rpc('exam_list',{p_phone:S.me.phone,p_code:S.me.code}).then(function(d){
+    if(d.error){sv('pt_me',null);S.me=null;loginView(d.error);throw new Error(d.error)}
+    S.d=d;S.me.name=d.name||S.me.name;S.rev={};home();
+  });
+}
+function logout(){sv('pt_me',null);S.me=S.d=null;loginView()}
+
+/* ---------- الرئيسية ---------- */
+function home(){
+  clearInterval(S.tm);
+  $('app').innerHTML='<div class="top card"><div><b>أهلاً '+esc(S.me.name||'')+' 👋</b><div class="m">بوابة الطالب</div></div><button class="g" onclick="logout()">خروج</button></div>'+
+  '<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
+  ({new:tNew,old:tOld,err:tErr})[S.tab]();
+}
+function tab(t){S.tab=t;home()}
+
+/* ---------- 1) الاختبارات الجديدة ---------- */
+function tNew(){
+  var now=Date.parse(S.d.now)||Date.now();
+  var list=(S.d.exams||[]).filter(function(e){return e.in_progress||e.used<e.max_attempts});
+  $('body').innerHTML=list.length?list.map(function(e){
+    var soon=e.opens_at&&Date.parse(e.opens_at)>now;
+    return '<div class="card"><div class="row"><div><b>'+esc(e.title)+'</b><div class="m">'+e.count+' سؤال · '+e.duration_min+' دقيقة · محاولات: '+e.used+'/'+e.max_attempts+(e.closes_at?' · يغلق '+dt(e.closes_at):'')+'</div></div>'+
+    (soon?'<span class="bd mid">يبدأ '+dt(e.opens_at)+'</span>':'<button onclick="startExam(\''+e.id+'\','+(e.in_progress?1:0)+')">'+(e.in_progress?'كمّل الاختبار':'ابدأ الاختبار')+'</button>')+'</div></div>';
+  }).join(''):'<div class="card m" style="text-align:center">لا توجد اختبارات جديدة متاحة الآن ✨</div>';
+}
+
+/* ---------- 2) الاختبارات القديمة + الإحصائيات ---------- */
+function tOld(){
+  var R=(S.d.results||[]).slice();
+  if(!R.length){$('body').innerHTML='<div class="card m" style="text-align:center">لسه ما حلّتش أي اختبار</div>';return}
+  var P=R.map(pc),avg=Math.round(P.reduce(function(a,b){return a+b},0)/P.length);
+  var asc=R.slice().reverse().map(pc),W=300,H=90,pts=asc.map(function(v,i){return [asc.length>1?10+i*(W-20)/(asc.length-1):W/2,H-8-v*(H-20)/100]});
+  var line=pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ');
+  var trend=asc.length>1?(asc[asc.length-1]>=asc[0]?'📈 في تحسّن':'📉 محتاج مجهود'):'';
+  $('body').innerHTML='<div class="card"><h3>إحصائياتي</h3><div class="st"><div><b>'+R.length+'</b>اختبار</div><div><b>'+avg+'%</b>المتوسط</div><div><b>'+Math.max.apply(0,P)+'%</b>أعلى نتيجة</div><div><b>'+Math.min.apply(0,P)+'%</b>أقل نتيجة</div></div>'+
+  '<div class="m">تطور مستواي '+trend+'</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;background:#f8fafc;border-radius:10px"><polyline fill="none" stroke="#1e40af" stroke-width="2.5" points="'+line+'"/>'+pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#1e40af"/>'}).join('')+'</svg></div>'+
+  R.map(function(r){return '<div class="card row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+r.score+' من '+r.total+'</div></div><div class="row">'+bd(pc(r))+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'}).join('');
+}
+function getRev(id){return S.rev[id]?Promise.resolve(S.rev[id]):rpc('exam_review',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error)S.rev[id]=r;return r})}
+function item(it,i){
+  var ok=it.mine===it.correct,miss=it.mine==null;
+  return '<div class="card q '+(ok?'rt':'wr')+'"><b>سؤال '+(i+1)+'</b> '+(ok?'✅':'❌')+img(it.img).replace(/^(.+)$/,'<img src="$1" loading="lazy">')+
+  '<div>إجابتك: <b style="color:'+(ok?'var(--ok)':'var(--bad)')+'">'+(miss?'لم تُجب':L[it.mine]||esc(it.mine))+'</b>'+(ok?'':' · الصحيحة: <b style="color:var(--ok)">'+(L[it.correct]||esc(it.correct))+'</b>')+'</div>'+
+  (it.exp||it.exp_img?'<div class="ex"><b>الشرح:</b> '+esc(it.exp||'')+(it.exp_img?'<img src="'+img(it.exp_img)+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>':'')+'</div>';
+}
+function review(id){
+  $('body').innerHTML='<div class="card m">⏳ جارٍ التحميل...</div>';
+  getRev(id).then(function(r){
+    if(r.error){$('body').innerHTML='<div class="card err">'+esc(r.error)+'</div>';return}
+    $('body').innerHTML='<button class="g" onclick="tab(\'old\')">→ رجوع</button><div class="card" style="margin-top:10px"><b>'+esc(r.title)+'</b> '+bd(pc(r))+'</div>'+(r.items||[]).map(item).join('');
+  });
+}
+
+/* ---------- 3) أخطائي ---------- */
+function tErr(){
+  var ids=[],seen={};(S.d.results||[]).forEach(function(r){if(r.review&&!seen[r.exam_id]){seen[r.exam_id]=1;ids.push(r.exam_id)}});
+  if(!ids.length){$('body').innerHTML='<div class="card m" style="text-align:center">مفيش اختبارات متاحة للمراجعة لسه</div>';return}
+  $('body').innerHTML='<div class="card m">⏳ جارٍ تجميع أخطائك...</div>';
+  Promise.all(ids.map(getRev)).then(function(rs){
+    var h='',n=0;
+    rs.forEach(function(r){
+      if(!r||r.error)return;
+      var w=(r.items||[]).map(function(it,i){return [it,i]}).filter(function(x){return x[0].mine!==x[0].correct});
+      if(!w.length)return;n+=w.length;
+      h+='<h3 style="margin-top:14px">'+esc(r.title)+' <span class="bd lo">'+w.length+' خطأ</span></h3>'+w.map(function(x){return item(x[0],x[1])}).join('');
+    });
+    $('body').innerHTML=n?'<div class="card"><b>إجمالي أخطائك: '+n+' سؤال</b><div class="m">راجع الإجابة الصحيحة والشرح عشان ما تكررهاش 💪</div></div>'+h:'<div class="card" style="text-align:center">🎉 ما عندكش أخطاء! ممتاز</div>';
+  });
+}
+
+/* ---------- حل الاختبار ---------- */
+function startExam(id,resume){
+  if(!resume&&!confirm('هتبدأ الاختبار والوقت هيشتغل فوراً. متأكد؟'))return;
+  $('body').innerHTML='<div class="card m">⏳ جارٍ تحميل الاختبار...</div>';
+  rpc('exam_start',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(x){
+    if(x.error){alert(x.error);return load()}
+    var ans=x.answers||{},leaves=0,done=false,off=(Date.parse(x.now)||Date.now())-Date.now(),end=Date.parse(x.started_at)+x.duration_min*60000;
+    $('app').innerHTML='<div class="tm row"><span>'+esc(x.title)+'</span><span id="tl">--:--</span></div><div id="qs"></div><button id="sub" style="width:100%;margin:6px 0 30px">تسليم الاختبار</button>';
+    function draw(){$('qs').innerHTML=x.questions.map(function(q,i){return '<div class="card q"><b>سؤال '+(i+1)+' من '+x.questions.length+'</b><img src="'+img(q.img)+'"><div class="ch">'+Object.keys(L).map(function(k){return '<button class="'+(ans[q.id]===k?'s':'')+'" onclick="pick(\''+q.id+'\',\''+k+'\')">'+L[k]+'</button>'}).join('')+'</div></div>'}).join('')}
+    var sT;window.pick=function(q,k){if(done)return;ans[q]=k;draw();clearTimeout(sT);sT=setTimeout(function(){rpc('exam_save',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans}).catch(function(){})},600)};
+    function submit(auto){
+      if(done)return;if(!auto){var left=x.questions.filter(function(q){return !ans[q.id]}).length;if(!confirm(left?'لسه '+left+' سؤال من غير إجابة. تسلّم؟':'تأكيد تسليم الاختبار؟'))return}
+      done=true;clearInterval(S.tm);$('sub').disabled=true;
+      rpc('exam_submit',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans,p_leaves:leaves}).then(function(r){
+        alert(r.score!=null?'تم التسليم ✅\nدرجتك: '+r.score+' من '+r.total:'تم التسليم ✅');S.tab='old';return load();
+      }).catch(function(){done=false;$('sub').disabled=false;alert('تعذر التسليم، تأكد من النت وجرّب تاني')});
+    }
+    $('sub').onclick=function(){submit(false)};
+    document.onvisibilitychange=function(){if(document.hidden&&!done)leaves++};
+    S.tm=setInterval(function(){var s=Math.max(0,Math.floor((end-(Date.now()+off))/1000));$('tl').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s<=0)submit(true)},500);
+    draw();
+  }).catch(function(){alert('تعذر فتح الاختبار');load()});
+}
+
+/* ---------- تشغيل ---------- */
+(function(){var m=ld('pt_me');if(m&&m.phone){S.me=m;load().catch(function(){})}else loginView()})();
 </script>
-</body></html>
+</body>
+</html>
