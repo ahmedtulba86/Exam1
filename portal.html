@@ -1,172 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>بوابة متابعة الدرجات</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173b78"><title>بوابة الطالب | عصير الكتب</title>
 <style>
-:root{--bg:#f1f5f9;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--pri:#1e40af;--ok:#16a34a;--mid:#d97706;--low:#dc2626}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--ink:#e5e7eb;--mute:#94a3b8;--line:#25314a;--pri:#60a5fa;--ok:#4ade80;--mid:#fbbf24;--low:#f87171}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
-.wrap{max-width:560px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
-h1{font-size:20px;margin:8px 0 4px}h2{font-size:16px;margin:0 0 10px}
-.mute{color:var(--mute);font-size:13px}
-label{display:block;font-size:13px;margin:10px 0 4px;color:var(--mute)}
-input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:var(--bg);color:var(--ink);direction:ltr;text-align:right}
-button{width:100%;margin-top:14px;padding:12px;border:0;border-radius:10px;background:var(--pri);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
-button.ghost{background:transparent;color:var(--pri);border:1px solid var(--line);margin-top:0;width:auto;padding:6px 12px;font-size:13px}
-.msg{margin-top:10px;font-size:14px;color:var(--low)}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.kpi{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-.kpi b{display:block;font-size:22px}
-.kpi span{font-size:12px;color:var(--mute)}
-.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.row:first-of-type{border-top:0}
-.row .n{flex:1;min-width:0}
-.row .n b{display:block;overflow-wrap:anywhere}
-.bar{height:6px;background:var(--line);border-radius:99px;margin-top:6px;position:relative;overflow:hidden}
-.bar i{position:absolute;right:0;top:0;bottom:0;border-radius:99px}
-.sc{text-align:center;min-width:64px;font-weight:700}
-.sc small{display:block;font-weight:400;color:var(--mute);font-size:11px}
-.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.hidden{display:none}
-svg{width:100%;height:auto;display:block}
+:root{font-family:Tahoma,Arial,sans-serif;color:#172033;background:#f3f6fb;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#eaf1ff,#f8fafc 55%,#e8f4f2)}button,input{font:inherit}button{border:0;border-radius:10px;background:#1d4e9e;color:white;padding:12px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.secondary{background:#e8eef8;color:#173b78}.danger{background:#b42332}.wrap{width:min(960px,100%);margin:auto;padding:22px 14px 40px}.brand{text-align:center;margin:16px 0 22px}.brand .logo{width:58px;height:58px;border-radius:18px;background:#173b78;color:#fff;display:grid;place-items:center;font-size:29px;margin:auto;box-shadow:0 8px 24px #173b7830}.brand h1{font-size:25px;margin:10px 0 4px;color:#173b78}.brand p{margin:0;color:#64748b;font-size:13px}.panel{background:#fff;border:1px solid #e4eaf3;border-radius:18px;padding:20px;box-shadow:0 14px 40px #23395b0d}.login{max-width:470px;margin:0 auto}.login h2{margin:0 0 6px}.muted{color:#64748b;font-size:13px;line-height:1.7}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;outline:none}.field input:focus{border-color:#3974c7;box-shadow:0 0 0 3px #3974c71a}.error{color:#b42332;font-size:13px;min-height:22px;margin-top:8px}.legacy{margin-top:15px;border-top:1px solid #e8edf4;padding-top:12px}.legacy summary{cursor:pointer;color:#34598e;font-weight:700;font-size:13px}.legacybox{background:#f8fafc;padding:10px;border-radius:12px;margin-top:10px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tabs button{padding:8px 12px;font-size:12px}.tabs button.active{background:#173b78}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.metric{border:1px solid #e7edf5;border-radius:13px;padding:14px;background:#fbfdff;min-width:0}.metric small{color:#64748b;display:block;margin-bottom:7px}.metric strong{font-size:23px;color:#173b78;overflow-wrap:anywhere}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.top h2{margin:0;color:#173b78}.tag{display:inline-block;border-radius:999px;background:#eaf2ff;color:#214d8c;padding:5px 9px;font-size:12px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:440px}th,td{text-align:right;padding:11px 9px;border-bottom:1px solid #e8edf4;font-size:13px}th{background:#f7f9fc;color:#475569;white-space:nowrap}.empty{padding:18px;border:1px dashed #cbd5e1;border-radius:12px;color:#64748b;text-align:center;font-size:13px;margin-top:12px}.foot{text-align:center;color:#94a3b8;font-size:11px;margin:22px 0 0}.hide{display:none!important}@media(max-width:680px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:15px}.brand h1{font-size:22px}.metric strong{font-size:20px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-<div id="loginView">
-  <div class="card">
-    <h1>متابعة الدرجات</h1>
-    <div class="mute">ادخل برقم تليفون الطالب والكود السري اللي وصلك من المعلم.</div>
-    <form id="f" autocomplete="off">
-      <label for="ph">رقم تليفون الطالب</label>
-      <input id="ph" inputmode="numeric" autocomplete="tel" placeholder="01xxxxxxxxx" required>
-      <label for="cd">الكود السري</label>
-      <input id="cd" type="password" inputmode="numeric" autocomplete="off" required>
-      <button type="submit" id="go">دخول</button>
-      <div class="msg" id="msg" role="alert"></div>
+<main class="wrap">
+  <header class="brand"><div class="logo">🎓</div><h1>عصير الكتب</h1><p>بوابة الطالب — حسابك التعليمي في مكان واحد</p></header>
+  <section id="loginPanel" class="panel login">
+    <h2>تسجيل دخول الطالب</h2><p class="muted">اكتب اسمك كما هو مسجل لدى المعلم، ثم أدخل كودك الشخصي.</p>
+    <form id="mainForm" autocomplete="on">
+      <div class="field"><label for="studentName">اسم الطالب</label><input id="studentName" name="name" autocomplete="name" required placeholder="الاسم المسجل في المنصة"></div>
+      <div class="field"><label for="studentCode">الكود الشخصي</label><input id="studentCode" name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="أدخل كود الدخول" maxlength="24"></div>
+      <button id="mainLoginBtn" type="submit" style="width:100%">دخول إلى حسابي</button>
     </form>
-  </div>
-</div>
+    <details class="legacy"><summary>لديّ بيانات دخول قديمة</summary>
+      <div class="legacybox">
+        <div class="tabs"><button type="button" class="active" data-mode="account">اسم المستخدم وكلمة المرور</button><button type="button" class="secondary" data-mode="phone">الهاتف والكود القديم</button></div>
+        <form id="legacyAccountForm"><div class="field"><label for="oldUsername">اسم المستخدم</label><input id="oldUsername" autocomplete="username"></div><div class="field"><label for="oldPassword">كلمة المرور</label><input id="oldPassword" type="password" autocomplete="current-password"></div><button type="submit" style="width:100%">دخول بالبيانات القديمة</button></form>
+        <form id="legacyPhoneForm" class="hide"><div class="field"><label for="oldPhone">رقم الهاتف المسجل</label><input id="oldPhone" inputmode="tel" autocomplete="tel"></div><div class="field"><label for="oldPhoneCode">الكود القديم</label><input id="oldPhoneCode" autocomplete="one-time-code"></div><button type="submit" style="width:100%">دخول بالهاتف والكود</button></form>
+      </div>
+    </details>
+    <div id="loginError" class="error" role="alert"></div>
+    <p class="muted">إذا لم يعمل الكود، تواصل مع المعلم للتأكد من تفعيل حسابك أو إصدار كود جديد.</p>
+  </section>
 
-<div id="dataView" class="hidden"></div>
-
-</div>
-
+  <section id="dashboard" class="hide">
+    <div class="panel">
+      <div class="top"><div><span class="tag">حساب الطالب</span><h2 id="welcome" style="margin-top:8px">مرحبًا</h2><div id="studentGroup" class="muted"></div></div><button id="logoutBtn" class="danger" type="button">تسجيل الخروج</button></div>
+      <div class="grid">
+        <div class="metric"><small>متوسط الدرجات</small><strong id="mAverage">—</strong></div>
+        <div class="metric"><small>الاختبارات المرصودة</small><strong id="mTaken">—</strong></div>
+        <div class="metric"><small>ترتيبك في المجموعة</small><strong id="mRank">—</strong></div>
+        <div class="metric"><small>متوسط المجموعة</small><strong id="mGroupAverage">—</strong></div>
+      </div>
+      <div id="publishedNotice" class="empty hide">لم ينشر المعلم نتائجك بعد. ستظهر هنا بمجرد إتاحتها.</div>
+    </div>
+    <div class="panel" style="margin-top:13px"><h3 style="margin:0 0 12px;color:#173b78">سجل الدرجات</h3><div id="gradesArea"></div></div>
+    <div class="panel" style="margin-top:13px"><h3 style="margin:0 0 12px;color:#173b78">مؤشرات أدائك</h3><div id="topicsArea" class="muted">لا توجد تحليلات منشورة حاليًا.</div></div>
+  </section>
+  <footer class="foot">عصير الكتب · بوابة الطالب الآمنة</footer>
+</main>
 <script>
 (function(){
+'use strict';
 var SB_URL='https://nmcmhlqstkfhsvnyeeod.supabase.co';
 var SB_KEY='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH';
-var cred=null;
-
-function $(i){return document.getElementById(i);}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function digits(s){return String(s||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/\D/g,'');}
-function color(p){return p>=85?'var(--ok)':p>=50?'var(--mid)':'var(--low)';}
-function label(p){return p>=85?'ممتاز':p>=70?'جيد جدًا':p>=50?'ناجح':'يحتاج دعم';}
-function num(v){return Math.round(v*10)/10;}
-
-function load(){
-  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort();},15000);
-  return fetch(SB_URL+'/rest/v1/rpc/portal_get',{method:'POST',signal:ctl.signal,
-    headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},
-    body:JSON.stringify({p_phone:cred.p,p_code:cred.c})
-  }).then(function(r){clearTimeout(tm);if(!r.ok)throw new Error('تعذر الاتصال بالخادم');return r.json();});
+var SESSION_KEY='aseer_student_session_v1';
+var $=function(id){return document.getElementById(id);};
+var token='';
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function headers(){return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};}
+function rpc(name,args){return fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:headers(),body:JSON.stringify(args)}).then(function(r){return r.text().then(function(t){var j={};try{j=t?JSON.parse(t):{};}catch(e){}if(!r.ok)throw new Error(j.message||j.error||t||('HTTP '+r.status));return j;});});}
+function setError(msg){$('loginError').textContent=msg||'';}
+function setBusy(b){$('mainLoginBtn').disabled=!!b;$('mainLoginBtn').textContent=b?'جارٍ التحقق...':'دخول إلى حسابي';}
+function storeSession(r){token=r.token;try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:r.token,expires_at:r.expires_at}));}catch(e){}}
+function clearSession(){token='';try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
+function showLogin(){ $('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide'); }
+function showDashboard(){ $('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide'); }
+function pct(v){return v===null||v===undefined||!isFinite(Number(v))?'—':Number(v).toFixed(1)+'%';}
+function render(data){
+  var d=data.data||{},o=d.overall||{},exams=Array.isArray(d.exams)?d.exams:[];
+  $('welcome').textContent='مرحبًا، '+(d.name||data.name||'طالبنا');
+  $('studentGroup').textContent=d.group?'المجموعة: '+d.group:'حسابك مرتبط بسجل الطالب رقم '+data.student_id;
+  $('mAverage').textContent=pct(o.pct);
+  $('mTaken').textContent=(o.taken==null?'0':o.taken)+' / '+(o.total==null?'—':o.total);
+  $('mRank').textContent=o.rank?o.rank+' من '+(o.groupSize||'—'):'—';
+  $('mGroupAverage').textContent=pct(o.groupAvg);
+  $('publishedNotice').classList.toggle('hide',!!data.has_published_data);
+  if(exams.length){$('gradesArea').innerHTML='<div class="tablewrap"><table><thead><tr><th>التقييم</th><th>الدرجة</th><th>النسبة</th><th>متوسط المجموعة</th></tr></thead><tbody>'+exams.map(function(x){return '<tr><td>'+esc(x.name)+'</td><td>'+(x.score==null?'لم تُرصد':esc(x.score)+' / '+esc(x.max))+'</td><td>'+pct(x.pct)+'</td><td>'+pct(x.groupAvg)+'</td></tr>';}).join('')+'</tbody></table></div>';}
+  else $('gradesArea').innerHTML='<div class="empty">لا توجد درجات منشورة حاليًا.</div>';
+  var topics=Array.isArray(d.topics)?d.topics:[];
+  $('topicsArea').innerHTML=topics.length?'<div class="tablewrap"><table><thead><tr><th>الموضوع</th><th>إجابات صحيحة</th><th>الإجمالي</th><th>نسبة الإتقان</th></tr></thead><tbody>'+topics.map(function(t){return '<tr><td>'+esc(t.name)+'</td><td>'+esc(t.correct)+'</td><td>'+esc(t.total)+'</td><td>'+pct(t.pct)+'</td></tr>';}).join('')+'</tbody></table></div>':'لا توجد تحليلات منشورة حاليًا.';
+  showDashboard();
 }
-
-function chart(list){
-  var pts=list.filter(function(e){return e.pct!==null;});
-  if(pts.length<2)return '';
-  var W=520,H=190,pl=30,pr=14,pt=14,pb=30,iw=W-pl-pr,ih=H-pt-pb,n=pts.length;
-  function x(i){return W-pr-(n===1?0:i*iw/(n-1));}  // RTL: oldest on the right
-  function y(v){return pt+ih-(Math.max(0,Math.min(100,v))/100*ih);}
-  var grid=[0,25,50,75,100].map(function(v){return '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" '+(v%50?'stroke-dasharray="3 3"':'')+'/><text x="'+(pl-5)+'" y="'+(y(v)+4)+'" font-size="10" text-anchor="end" fill="var(--mute)">'+v+'</text>';}).join('');
-  var path=pts.map(function(e,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(e.pct).toFixed(1);}).join(' ');
-  var gp=pts.filter(function(e){return e.groupAvg!=null;});
-  var gpath=gp.length>=2?pts.map(function(e,i){return e.groupAvg==null?null:{x:x(i),y:y(e.groupAvg)};}).filter(Boolean).map(function(q,i){return (i?'L':'M')+q.x.toFixed(1)+' '+q.y.toFixed(1);}).join(' '):'';
-  var every=n>8?Math.ceil(n/8):1;
-  var xl=pts.map(function(e,i){return (i%every===0||i===n-1)?'<text x="'+x(i).toFixed(1)+'" y="'+(H-10)+'" font-size="10" text-anchor="middle" fill="var(--mute)">'+(i+1)+'</text>':'';}).join('');
-  var dots=pts.map(function(e,i){return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(e.pct).toFixed(1)+'" r="4.5" fill="var(--card)" stroke="'+color(e.pct)+'" stroke-width="3"><title>'+esc(e.name)+': '+num(e.pct)+'%'+(e.groupAvg!=null?' (المجموعة '+num(e.groupAvg)+'%)':'')+'</title></circle>';}).join('');
-  var legend='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px"><span><b style="color:var(--pri)">━</b> الطالب</span>'+(gpath?'<span><b>┅</b> متوسط المجموعة</span>':'')+'<span>الأرقام أسفل الرسم = ترتيب الاختبار</span></div>';
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="تطور مستوى الطالب مقارنة بالمجموعة">'+grid+(gpath?'<path d="'+gpath+'" fill="none" stroke="var(--mute)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>':'')+'<path d="'+path+'" fill="none" stroke="var(--pri)" stroke-width="2.8" stroke-linejoin="round"/>'+dots+xl+'</svg>'+legend;
-}
-
-function topicsCard(tp){
-  tp=(tp||[]).filter(function(t){return t.total>=2;});
-  if(!tp.length)return '';
-  var weak=tp.filter(function(t){return t.pct<70;}).slice(0,3);
-  var strong=tp.slice().sort(function(a,b){return b.pct-a.pct;}).filter(function(t){return t.pct>=70;}).slice(0,3);
-  function line(t){
-    var diff=t.groupPct!=null?t.pct-t.groupPct:null;
-    return '<div class="row"><div class="n"><b>'+esc(t.name)+'</b><div class="bar"><i style="width:'+Math.max(2,t.pct)+'%;background:'+color(t.pct)+'"></i>'+(t.groupPct!=null?'<u style="position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);right:'+Math.min(98,t.groupPct)+'%" title="متوسط المجموعة"></u>':'')+'</div>'+
-      '<div class="mute" style="font-size:12px;margin-top:4px">'+t.correct+' صح من '+t.total+(diff!==null?' · '+(diff>=3?'أعلى من المجموعة':diff<=-3?'أقل من المجموعة':'قريب من المجموعة'):'')+'</div></div><div class="sc" style="color:'+color(t.pct)+'">'+num(t.pct)+'%</div></div>';
-  }
-  var h='<div class="card"><h2>نقاط القوة والضعف</h2>';
-  if(weak.length)h+='<div style="font-weight:700;color:var(--low);margin:4px 0">يحتاج تركيز</div>'+weak.map(line).join('');
-  if(strong.length)h+='<div style="font-weight:700;color:var(--ok);margin:12px 0 4px">نقاط القوة</div>'+strong.map(line).join('');
-  if(!weak.length&&!strong.length)h+=tp.map(line).join('');
-  h+='<div class="mute" style="margin-top:10px">الخط الأسود على الشريط = متوسط المجموعة. محسوبة من أسئلة الاختبارات الإلكترونية.</div></div>';
-  return h;
-}
-
-function render(d){
-  var o=d.overall||{},ex=d.exams||[];
-  var done=ex.filter(function(e){return e.score!==null;});
-  var pending=ex.filter(function(e){return e.score===null;});
-  var pct=o.pct;
-  var series=done.map(function(e){return e.pct;});
-  var trend=series.length>=2?series[series.length-1]-series[0]:null;
-  var h='<div class="card"><div class="top"><div><h1>'+esc(d.name)+'</h1><div class="mute">'+esc(d.group||'')+'</div></div><button class="ghost" id="out">خروج</button></div>';
-  if(pct!==null&&pct!==undefined){
-    h+='<div style="margin-top:10px"><span class="pill" style="background:'+color(pct)+';color:#fff">'+label(pct)+'</span></div>';
-    h+='<div class="kpis"><div class="kpi"><b style="color:'+color(pct)+'">'+num(pct)+'%</b><span>المستوى العام</span></div>'+
-       '<div class="kpi"><b>'+(o.rank?'<bdi dir="ltr">'+o.rank+' / '+o.groupSize+'</bdi>':'—')+'</b><span>الترتيب في المجموعة</span></div>'+
-       '<div class="kpi"><b>'+(o.groupAvg!=null?num(o.groupAvg)+'%':'—')+'</b><span>متوسط المجموعة</span></div></div>';
-    if(o.groupAvg!=null){var gd=pct-o.groupAvg;h+='<div class="mute" style="margin-top:10px">'+(gd>=3?'▲ أعلى من متوسط المجموعة بـ '+num(gd)+'%':gd<=-3?'▼ أقل من متوسط المجموعة بـ '+num(Math.abs(gd))+'%':'قريب من متوسط المجموعة')+'</div>';}
-    if(trend!==null){h+='<div class="mute" style="margin-top:10px">'+(trend>=3?'▲ مستوى في تحسن بين أول وآخر اختبار بمقدار '+num(trend)+'%':trend<=-3?'▼ مستوى في تراجع بين أول وآخر اختبار بمقدار '+num(Math.abs(trend))+'%':'مستوى مستقر بين أول وآخر اختبار')+'</div>';}
-  }else{h+='<div class="mute" style="margin-top:10px">لا توجد درجات مسجلة حتى الآن.</div>';}
-  h+='</div>';
-  var c=chart(ex);
-  if(c)h+='<div class="card"><h2>تطور المستوى</h2>'+c+'</div>';
-  h+=topicsCard(d.topics);
-  if(ex.length){
-    h+='<div class="card"><h2>الاختبارات ('+done.length+' من '+ex.length+')</h2>';
-    ex.slice().reverse().forEach(function(e){
-      if(e.score===null)return;
-      h+='<div class="row"><div class="n"><b>'+esc(e.name)+'</b><div class="bar"><i style="width:'+Math.max(2,Math.min(100,e.pct))+'%;background:'+color(e.pct)+'"></i></div>'+(e.groupAvg!=null?'<div class="mute" style="font-size:12px;margin-top:4px">متوسط المجموعة '+num(e.groupAvg)+'% '+(e.pct-e.groupAvg>=3?'<span style="color:var(--ok)">▲ أعلى</span>':e.pct-e.groupAvg<=-3?'<span style="color:var(--low)">▼ أقل</span>':'')+'</div>':'')+'</div>'+
-         '<div class="sc" style="color:'+color(e.pct)+'">'+'<bdi dir="ltr">'+num(e.score)+' / '+num(e.max)+'</bdi>'+'<small>'+num(e.pct)+'%</small></div></div>';
-    });
-    if(pending.length){h+='<div class="mute" style="margin-top:10px">لم تُسجَّل له درجة في: '+pending.map(function(e){return esc(e.name);}).join('، ')+'</div>';}
-    h+='</div>';
-  }
-  h+='<div class="mute" style="text-align:center;margin:8px 0 20px">آخر تحديث: '+(d.updated?new Date(d.updated).toLocaleString('ar-EG'):'—')+'</div>';
-  $('dataView').innerHTML=h;
-  $('out').onclick=function(){cred=null;try{sessionStorage.removeItem('pc');}catch(e){}$('dataView').classList.add('hidden');$('loginView').classList.remove('hidden');$('cd').value='';};
-}
-
-function enter(){
-  $('go').disabled=true;$('msg').textContent='';
-  load().then(function(d){
-    $('go').disabled=false;
-    if(!d||d.error){$('msg').textContent=(d&&d.error)||'تعذر تحميل البيانات';cred=null;try{sessionStorage.removeItem('pc');}catch(e){}return;}
-    try{sessionStorage.setItem('pc',JSON.stringify(cred));}catch(e){}
-    $('loginView').classList.add('hidden');$('dataView').classList.remove('hidden');
-    render(d);
-  }).catch(function(e){$('go').disabled=false;$('msg').textContent=e&&e.name==='AbortError'?'انتهت المهلة، تأكد من الإنترنت':(e&&e.message)||'حدث خطأ';});
-}
-$('f').addEventListener('submit',function(ev){
-  ev.preventDefault();
-  cred={p:digits($('ph').value),c:String($('cd').value).trim()};
-  if(!cred.p||!cred.c){$('msg').textContent='اكتب الرقم والكود';return;}
-  enter();
-});
-try{var sv=JSON.parse(sessionStorage.getItem('pc')||'null');if(sv&&sv.p&&sv.c){cred=sv;enter();}}catch(e){}
+function loadMe(){if(!token){showLogin();return Promise.resolve(false);}return rpc('student_portal_me',{p_token:token}).then(function(r){if(!r||!r.ok){clearSession();showLogin();setError(r&&r.error||'انتهت الجلسة. سجّل الدخول مرة أخرى.');return false;}render(r);return true;}).catch(function(e){clearSession();showLogin();setError('تعذر الاتصال بالبوابة: '+e.message);return false;});}
+function login(args){setError('');setBusy(true);return rpc('student_portal_login',args).then(function(r){if(!r||!r.ok)throw new Error(r&&r.error||'بيانات الدخول غير صحيحة');storeSession(r);return loadMe();}).catch(function(e){setError(e.message||'تعذر تسجيل الدخول.');}).finally(function(){setBusy(false);});}
+$('mainForm').addEventListener('submit',function(e){e.preventDefault();var name=$('studentName').value.trim(),code=$('studentCode').value.trim();if(!name||!code){setError('اكتب الاسم والكود.');return;}login({p_name:name,p_code:code,p_username:null,p_password:null,p_phone:null,p_legacy_code:null});});
+$('legacyAccountForm').addEventListener('submit',function(e){e.preventDefault();var u=$('oldUsername').value.trim(),p=$('oldPassword').value;if(!u||!p){setError('اكتب اسم المستخدم وكلمة المرور.');return;}login({p_name:null,p_code:null,p_username:u,p_password:p,p_phone:null,p_legacy_code:null});});
+$('legacyPhoneForm').addEventListener('submit',function(e){e.preventDefault();var p=$('oldPhone').value.trim(),c=$('oldPhoneCode').value.trim();if(!p||!c){setError('اكتب رقم الهاتف والكود القديم.');return;}login({p_name:null,p_code:null,p_username:null,p_password:null,p_phone:p,p_legacy_code:c});});
+document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);x.classList.toggle('secondary',x!==b);});$('legacyAccountForm').classList.toggle('hide',b.dataset.mode!=='account');$('legacyPhoneForm').classList.toggle('hide',b.dataset.mode!=='phone');setError('');});});
+$('logoutBtn').addEventListener('click',function(){var old=token;clearSession();showLogin();$('studentName').value='';$('studentCode').value='';setError('تم تسجيل الخروج.');if(old)rpc('student_portal_logout',{p_token:old}).catch(function(){});});
+try{var saved=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');if(saved&&saved.token&&(!saved.expires_at||new Date(saved.expires_at).getTime()>Date.now())){token=saved.token;loadMe();}else{clearSession();showLogin();}}catch(e){clearSession();showLogin();}
 })();
 </script>
-</body>
-</html>
+</body></html>
