@@ -42,6 +42,9 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function rpc(n,b){return fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(j&&j.message&&!j.error)throw new Error(j.message);return j})}
 function img(p){return !p?'':/^(https?:|data:)/.test(p)?p:U+'/storage/v1/object/public/question-images/'+p}
 function dt(x){try{return new Date(x).toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
+function fm(x){return Math.round((+x||0)*100)/100}
+function sp(v){return v==null||v===''?[]:String(v).split(',')}
+function allOk(it){var c=sp(it.correct),m=sp(it.mine);return c.length>0&&c.every(function(x,i){return m[i]===x})}
 function pc(r){return r.total>0?Math.round(r.score/r.total*100):0}
 function bd(p){return '<span class="bd '+(p>=85?'hi':p>=60?'mid':'lo')+'">'+p+'%</span>'}
 function sv(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
@@ -107,14 +110,17 @@ function tOld(){
   var trend=asc.length>1?(asc[asc.length-1]>=asc[0]?'📈 في تحسّن':'📉 محتاج مجهود'):'';
   $('body').innerHTML='<div class="card"><h3>إحصائياتي</h3><div class="st"><div><b>'+R.length+'</b>اختبار</div><div><b>'+avg+'%</b>المتوسط</div><div><b>'+Math.max.apply(0,P)+'%</b>أعلى نتيجة</div><div><b>'+Math.min.apply(0,P)+'%</b>أقل نتيجة</div></div>'+
   '<div class="m">تطور مستواي '+trend+'</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;background:#f8fafc;border-radius:10px"><polyline fill="none" stroke="#1e40af" stroke-width="2.5" points="'+line+'"/>'+pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#1e40af"/>'}).join('')+'</svg></div>'+
-  R.map(function(r){return '<div class="card row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+r.score+' من '+r.total+'</div></div><div class="row">'+bd(pc(r))+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'}).join('');
+  R.map(function(r){return '<div class="card row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+fm(r.score)+' من '+r.total+'</div></div><div class="row">'+bd(pc(r))+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'}).join('');
 }
 function getRev(id){return S.rev[id]?Promise.resolve(S.rev[id]):rpc('exam_review',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error)S.rev[id]=r;return r})}
+function eimgs(v){if(!v)return [];v=String(v).trim();if(v.charAt(0)==='['){try{return JSON.parse(v).filter(Boolean)}catch(e){}}return [v]}
 function item(it,i){
-  var ok=it.mine===it.correct,miss=it.mine==null;
+  var c=sp(it.correct),m=sp(it.mine),ok=allOk(it),n=c.length;
+  function part(j){var good=m[j]===c[j],mi=m[j]?(L[m[j]]||esc(m[j])):'لم تُجب';
+    return '<div>'+(n>1?'<b>مطلوب '+(j+1)+':</b> '+(good?'✅ ':'❌ '):'')+'إجابتك: <b style="color:'+(good?'var(--ok)':'var(--bad)')+'">'+mi+'</b>'+(good?'':' · الصحيحة: <b style="color:var(--ok)">'+(L[c[j]]||esc(c[j]))+'</b>')+'</div>'}
   return '<div class="card q '+(ok?'rt':'wr')+'"><b>سؤال '+(i+1)+'</b> '+(ok?'✅':'❌')+img(it.img).replace(/^(.+)$/,'<img src="$1" loading="lazy">')+
-  '<div>إجابتك: <b style="color:'+(ok?'var(--ok)':'var(--bad)')+'">'+(miss?'لم تُجب':L[it.mine]||esc(it.mine))+'</b>'+(ok?'':' · الصحيحة: <b style="color:var(--ok)">'+(L[it.correct]||esc(it.correct))+'</b>')+'</div>'+
-  (it.exp||it.exp_img?'<div class="ex"><b>الشرح:</b> '+esc(it.exp||'')+(it.exp_img?'<img src="'+img(it.exp_img)+'" style="max-width:100%;border-radius:8px;margin-top:6px">':'')+'</div>':'')+'</div>';
+  c.map(function(_,j){return part(j)}).join('')+
+  (it.exp||eimgs(it.exp_img).length?'<div class="ex"><b>الشرح:</b> '+esc(it.exp||'')+eimgs(it.exp_img).map(function(p){return '<img src="'+img(p)+'" loading="lazy" style="max-width:100%;border-radius:8px;margin-top:6px;display:block">'}).join('')+'</div>':'')+'</div>';
 }
 function review(id){
   $('body').innerHTML='<div class="card m">⏳ جارٍ التحميل...</div>';
@@ -133,7 +139,7 @@ function tErr(){
     var h='',n=0;
     rs.forEach(function(r){
       if(!r||r.error)return;
-      var w=(r.items||[]).map(function(it,i){return [it,i]}).filter(function(x){return x[0].mine!==x[0].correct});
+      var w=(r.items||[]).map(function(it,i){return [it,i]}).filter(function(x){return !allOk(x[0])});
       if(!w.length)return;n+=w.length;
       h+='<h3 style="margin-top:14px">'+esc(r.title)+' <span class="bd lo">'+w.length+' خطأ</span></h3>'+w.map(function(x){return item(x[0],x[1])}).join('');
     });
@@ -149,13 +155,13 @@ function startExam(id,resume){
     if(x.error){alert(x.error);return load()}
     var ans=x.answers||{},leaves=0,done=false,off=(Date.parse(x.now)||Date.now())-Date.now(),end=Date.parse(x.started_at)+x.duration_min*60000;
     $('app').innerHTML='<div class="tm row"><span>'+esc(x.title)+'</span><span id="tl">--:--</span></div><div id="qs"></div><button id="sub" style="width:100%;margin:6px 0 30px">تسليم الاختبار</button>';
-    function draw(){$('qs').innerHTML=x.questions.map(function(q,i){return '<div class="card q"><b>سؤال '+(i+1)+' من '+x.questions.length+'</b><img src="'+img(q.img)+'"><div class="ch">'+Object.keys(L).map(function(k){return '<button class="'+(ans[q.id]===k?'s':'')+'" onclick="pick(\''+q.id+'\',\''+k+'\')">'+L[k]+'</button>'}).join('')+'</div></div>'}).join('')}
-    var sT;window.pick=function(q,k){if(done)return;ans[q]=k;draw();clearTimeout(sT);sT=setTimeout(function(){rpc('exam_save',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans}).catch(function(){})},600)};
+    function draw(){$('qs').innerHTML=x.questions.map(function(q,i){var n=q.n||1,cur=sp(ans[q.id]);return '<div class="card q"><b>سؤال '+(i+1)+' من '+x.questions.length+'</b><img src="'+img(q.img)+'">'+Array.apply(0,Array(n)).map(function(_,j){return (n>1?'<div class="m" style="margin-top:8px"><b>مطلوب '+(j+1)+'</b></div>':'')+'<div class="ch">'+Object.keys(L).map(function(k){return '<button class="'+(cur[j]===k?'s':'')+'" onclick="pick(\''+q.id+'\','+j+',\''+k+'\','+n+')">'+L[k]+'</button>'}).join('')+'</div>'}).join('')+'</div>'}).join('')}
+    var sT;window.pick=function(q,j,k,n){if(done)return;var cur=sp(ans[q]);while(cur.length<n)cur.push('');cur[j]=k;ans[q]=n>1?cur.join(','):k;draw();clearTimeout(sT);sT=setTimeout(function(){rpc('exam_save',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans}).catch(function(){})},600)};
     function submit(auto){
-      if(done)return;if(!auto){var left=x.questions.filter(function(q){return !ans[q.id]}).length;if(!confirm(left?'لسه '+left+' سؤال من غير إجابة. تسلّم؟':'تأكيد تسليم الاختبار؟'))return}
+      if(done)return;if(!auto){var left=x.questions.filter(function(q){var c=sp(ans[q.id]),n=q.n||1;for(var j=0;j<n;j++)if(!c[j])return true;return false}).length;if(!confirm(left?'لسه '+left+' سؤال من غير إجابة. تسلّم؟':'تأكيد تسليم الاختبار؟'))return}
       done=true;clearInterval(S.tm);$('sub').disabled=true;
       rpc('exam_submit',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans,p_leaves:leaves}).then(function(r){
-        alert(r.score!=null?'تم التسليم ✅\nدرجتك: '+r.score+' من '+r.total:'تم التسليم ✅');S.tab='old';return load();
+        alert(r.score!=null?'تم التسليم ✅\nدرجتك: '+fm(r.score)+' من '+r.total:'تم التسليم ✅');S.tab='old';return load();
       }).catch(function(){done=false;$('sub').disabled=false;alert('تعذر التسليم، تأكد من النت وجرّب تاني')});
     }
     $('sub').onclick=function(){submit(false)};
