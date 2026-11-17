@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>بوابة الطالب | عصير الكتب</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1e40af"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--p:#1e40af;--bg:#f1f5f9;--c:#fff;--t:#1e293b;--ok:#16a34a;--bad:#dc2626;--m:#64748b;--b:#e2e8f0}
@@ -81,7 +82,7 @@ function load(){
   return rpc('exam_list',{p_phone:S.me.phone,p_code:S.me.code}).then(function(d){
     if(d.error){sv('pt_me',null);S.me=null;loginView(d.error);throw new Error(d.error)}
     S.d=d;S.me.name=d.name||S.me.name;S.rev={};S.W=null;S.vd=null;flush();
-    return rpc('portal_stats',{p_phone:S.me.phone,p_code:S.me.code}).then(function(s){S.st={};(Array.isArray(s)?s:[]).forEach(function(x){S.st[x.exam_id]=x})}).catch(function(){S.st={}});
+    S.vdTry=0;return Promise.all([rpc('portal_stats',{p_phone:S.me.phone,p_code:S.me.code}).then(function(s){S.st={};(Array.isArray(s)?s:[]).forEach(function(x){S.st[x.exam_id]=x})}).catch(function(){S.st={}}),rpc('portal_notes',{p_phone:S.me.phone,p_code:S.me.code}).then(function(n){S.nt={};(Array.isArray(n)?n:[]).forEach(function(x){S.nt[x.exam_id]=x.note})}).catch(function(){S.nt={}})]);
   }).then(function(){home()});
 }
 function logout(){sv('pt_me',null);S.me=S.d=null;loginView()}
@@ -91,7 +92,7 @@ function avail(){return (S.d.exams||[]).filter(function(e){return e.in_progress|
 function home(){
   clearInterval(S.tm);
   var av=avail(),seen=ld('pt_seen')||[],nw=av.filter(function(e){return seen.indexOf(e.id)<0});
-  $('app').innerHTML='<div class="top card"><div><b>أهلاً '+esc(S.me.name||'')+' 👋</b><div class="m">بوابة الطالب</div></div><button class="g" onclick="logout()">خروج</button></div>'+
+  $('app').innerHTML=(pushOK()&&!ld('pt_push')&&Notification.permission!=='denied'?'<div class="nb" onclick="pushOn()"><span>🔔 فعّل التنبيهات عشان يوصلك أي اختبار أو فيديو جديد</span><span>تفعيل</span></div>':'')+'<div class="top card"><div><b>أهلاً '+esc(S.me.name||'')+' 👋</b><div class="m">بوابة الطالب</div></div><button class="g" onclick="logout()">خروج</button></div>'+
   (nw.length&&S.tab!=='new'?'<div class="nb" onclick="tab(\'new\')"><span>🔔 '+(nw.length>1?nw.length+' اختبارات جديدة متاحة':'اختبار جديد: '+esc(nw[0].title))+'</span><span>افتح ←</span></div>':'')+'<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'+(av.length?' <span class="dot">'+av.length+'</span>':'')],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي'],['vid','🎬 الفيديوهات']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
   ({new:tNew,old:tOld,err:tErr,vid:tVid})[S.tab]();
 }
@@ -118,9 +119,9 @@ function tOld(){
   var trend=asc.length>1?(asc[asc.length-1]>=asc[0]?'📈 في تحسّن':'📉 محتاج مجهود'):'';
   $('body').innerHTML='<div class="card"><h3>إحصائياتي</h3><div class="st"><div><b>'+R.length+'</b>اختبار</div><div><b>'+avg+'%</b>المتوسط</div><div><b>'+Math.max.apply(0,P)+'%</b>أعلى نتيجة</div><div><b>'+Math.min.apply(0,P)+'%</b>أقل نتيجة</div></div>'+
   '<div class="m">تطور مستواي '+trend+'</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;background:#f8fafc;border-radius:10px"><polyline fill="none" stroke="#1e40af" stroke-width="2.5" points="'+line+'"/>'+pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#1e40af"/>'}).join('')+'</svg></div>'+
-  R.map(function(r){var s=(S.st||{})[r.exam_id],mine=pc(r),cmp='';
+  R.map(function(r){var s=(S.st||{})[r.exam_id],mine=pc(r),cmp='',nt=(S.nt||{})[r.exam_id]?'<div class="ex" style="background:#fef3c7">📝 <b>ملاحظة المدرس:</b> '+esc(S.nt[r.exam_id])+'</div>':'';
     if(s){var d=mine-s.avg;cmp='<div class="m" style="margin-top:6px">🏅 ترتيبك <b>'+s.rank+'</b> من '+s.n+' · متوسط الدفعة <b>'+fm(s.avg)+'%</b> · أعلى درجة <b>'+fm(s.top)+'</b> '+(d>=0?'<span class="bd hi">فوق المتوسط</span>':'<span class="bd lo">تحت المتوسط</span>')+'</div>'}
-    return '<div class="card"><div class="row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+fm(r.score)+' من '+r.total+'</div></div><div class="row">'+bd(mine)+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'+cmp+'</div>'}).join('');
+    return '<div class="card"><div class="row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+fm(r.score)+' من '+r.total+'</div></div><div class="row">'+bd(mine)+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'+cmp+nt+'</div>'}).join('');
 }
 function eimgs(v){if(!v)return [];v=String(v).trim();if(v.charAt(0)==='['){try{return JSON.parse(v).filter(Boolean)}catch(e){}}return [v]}
 function getRev(id){return S.rev[id]?Promise.resolve(S.rev[id]):rpc('exam_review',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error)S.rev[id]=r;return r})}
@@ -151,20 +152,34 @@ function tErr(){
     S.W=W;S.tot=tot;drawErr();
   });
 }
+function vidsFor(tp){var d=S.vd;if(!d)return [];var t=tp.toLowerCase(),out=[],seen={},w=wGet();
+  function add(v){if(!seen[v.id]){seen[v.id]=1;out.push(v)}}
+  function col(id){vVids(id).forEach(add);vFolder(id).forEach(function(f){col(f.id)})}
+  (d.folders||[]).forEach(function(f){var n=f.name.toLowerCase();if(n.indexOf(t)>=0||t.indexOf(n)>=0)col(f.id)});
+  (d.videos||[]).forEach(function(v){if(v.title.toLowerCase().indexOf(t)>=0)add(v)});
+  out.sort(function(a,b){return (w.indexOf(a.id)>=0)-(w.indexOf(b.id)>=0)});return out.slice(0,3)}
+function planHtml(){
+  var rows=[];Object.keys(S.tot).forEach(function(k){if(k==='غير مصنّف')return;var wr=S.W.filter(function(w){return w.tp===k}).length;if(wr)rows.push({k:k,w:wr,t:S.tot[k],r:wr/S.tot[k]})});
+  rows.sort(function(a,b){return b.r-a.r});rows=rows.filter(function(x){return x.r>=0.3}).slice(0,3);
+  if(!rows.length)return '';
+  return '<div class="card" style="border:2px solid #1e40af"><b>📋 خطتك المقترحة للمذاكرة</b><div class="m">من أضعف الأبواب عندك، رتّبناها لك:</div>'+rows.map(function(x,i){var vs=vidsFor(x.k),w=wGet();return '<div style="margin-top:10px"><b>'+(i+1)+'. '+esc(x.k)+'</b> <span class="bd lo">'+Math.round(x.r*100)+'% غلط</span><div style="margin-top:4px">① '+(vs.length?'شاهد: '+vs.map(function(v){return '<button class="sm g" style="margin:2px" onclick="vPlay(\''+v.id+'\')">▶️ '+esc(v.title)+(w.indexOf(v.id)>=0?' ✅':'')+'</button>'}).join(''):'راجع الشرح اللي تحت أسئلتك الغلط')+'</div><div style="margin-top:4px">② <button class="sm" style="background:#16a34a" onclick="practice(\''+encodeURIComponent(x.k)+'\',\'topic\')">🎯 تدرّب على '+x.w+' سؤال</button></div></div>'}).join('')+'<div class="m" style="margin-top:10px">③ بعد ما تخلص، ارجع للاختبار الجاي بثقة 💪</div></div>';
+}
 function setEm(m){S.em=m;drawErr()}
 function drawErr(){
-  var W=S.W,mode=S.em||'topic';
+  S.inPr=false;var W=S.W,mode=S.em||'topic';
+  if(!S.vd&&!S.vdTry){S.vdTry=1;rpc('portal_videos',{p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error){S.vd=r;if(S.tab==='err'&&!S.inPr&&S.W)drawErr()}}).catch(function(){})}
   if(!W.length){$('body').innerHTML='<div class="card" style="text-align:center">🎉 ما عندكش أخطاء! ممتاز</div>';return}
   var by={},keys=[];W.forEach(function(w){var k=mode==='topic'?w.tp:w.t;if(!by[k]){by[k]=[];keys.push(k)}by[k].push(w)});
   if(mode==='topic')keys.sort(function(a,b){return by[b].length/S.tot[b]-by[a].length/S.tot[a]});
   var h='<div class="card"><b>إجمالي أخطائك: '+W.length+' سؤال</b><div class="row" style="margin-top:8px"><div class="row"><button class="sm '+(mode==='topic'?'':'g')+'" onclick="setEm(\'topic\')">حسب الباب</button><button class="sm '+(mode==='exam'?'':'g')+'" onclick="setEm(\'exam\')">حسب الاختبار</button></div><button class="sm" style="background:#16a34a" onclick="practice(0)">🎯 تدرّب على أخطائك ('+W.length+')</button></div></div>';
+  h+=planHtml();
   if(mode==='topic')h+='<div class="card"><b>أضعف الأبواب عندك</b>'+keys.map(function(k){var r=Math.round(by[k].length/S.tot[k]*100);return '<div style="margin-top:9px"><div class="row"><span>'+esc(k)+'</span><span class="m">'+by[k].length+' غلط من '+S.tot[k]+' ('+r+'%)</span></div><div class="bar"><i style="width:'+r+'%"></i></div></div>'}).join('')+'</div>';
   keys.forEach(function(k){h+='<h3 style="margin-top:14px">'+esc(k)+' <span class="bd lo">'+by[k].length+' خطأ</span> <button class="sm g" onclick="practice(\''+encodeURIComponent(k)+'\')">تدرّب</button></h3>'+by[k].map(function(w){return item(w.it,w.i,mode==='topic'?w.t:w.tp)}).join('')});
   $('body').innerHTML=h;
 }
 /* تدريب: من غير درجة ومن غير حفظ */
-function practice(k){
-  var m=S.em||'topic',list=S.W.filter(function(w){return k===0||(m==='topic'?w.tp:w.t)===decodeURIComponent(k)});
+function practice(k,md){
+  S.inPr=true;var m=md||S.em||'topic',list=S.W.filter(function(w){return k===0||(m==='topic'?w.tp:w.t)===decodeURIComponent(k)});
   list=list.slice().sort(function(){return Math.random()-.5});S.P={l:list,i:0,ok:0,bad:[],a:[],shown:false};pq();
 }
 function pq(){
@@ -180,12 +195,13 @@ function pn(){var P=S.P;P.i++;P.a=[];P.shown=false;pq()}
 
 /* ---------- 4) الفيديوهات ---------- */
 function ytId(u){var m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null}
-function wGet(){return ld('pt_w')||[]}
+function wGet(){var a=ld('pt_w')||[];return S.vd&&S.vd.watched?a.concat(S.vd.watched):a}
 function vFolder(id){return (S.vd.folders||[]).filter(function(f){return (f.parent_id||null)===(id||null)})}
 function vVids(id){return (S.vd.videos||[]).filter(function(v){return (v.folder_id||null)===(id||null)})}
 function vCnt(id){var n=vVids(id).length;vFolder(id).forEach(function(f){n+=vCnt(f.id)});return n}
 function vPathOf(id){var p=[],g=0;while(id&&g++<50){var f=(S.vd.folders||[]).find(function(x){return x.id===id});if(!f)break;p.unshift(f);id=f.parent_id}return p}
 function tVid(){
+  S.inPr=false;
   if(!S.vd){$('body').innerHTML='<div class="card m">⏳ جارٍ تحميل الفيديوهات...</div>';
     rpc('portal_videos',{p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(r.error)throw new Error(r.error);S.vd=r;S.vp=null;S.vq='';tVid()}).catch(function(){$('body').innerHTML='<div class="card err">تعذر تحميل الفيديوهات. لو لسه ما شغّلتش ملف portal_update_3.sql، شغّله مرة واحدة في Supabase.</div>'});return}
   var h='<input id="vq" placeholder="🔎 ابحث عن درس أو فيديو..." value="'+esc(S.vq||'')+'" oninput="S.vq=this.value;vRes()"><div id="vres"></div>';
@@ -202,12 +218,20 @@ function vRes(){
   var cr='<div class="card m" style="padding:10px"><a href="#" onclick="vGo(null);return false">🏠 الفيديوهات</a>'+path.map(function(f){return ' › <a href="#" onclick="vGo(\''+f.id+'\');return false">'+esc(f.name)+'</a>'}).join('')+'</div>';
   el.innerHTML=cr+fo.map(function(f){return '<div class="card row" style="cursor:pointer" onclick="vGo(\''+f.id+'\')"><b>📁 '+esc(f.name)+'</b><span class="m">'+vCnt(f.id)+' فيديو ←</span></div>'}).join('')+vs2.map(function(v){return vVidCard(v)}).join('')+(!fo.length&&!vs2.length?'<div class="card m" style="text-align:center">المجلد فاضي</div>':'');
 }
+function vBack(){S.inPr=false;if(S.tab==='err'&&S.W)drawErr();else tVid()}
 function vGo(id){S.vp=id;S.vq='';tVid()}
 function vPlay(id){
   var v=(S.vd.videos||[]).find(function(x){return x.id===id}),y=v&&ytId(v.url);if(!y)return;
-  var w=wGet();if(w.indexOf(id)<0){w.push(id);sv('pt_w',w)}
-  $('body').innerHTML='<button class="g sm" onclick="tVid()">→ رجوع</button><div class="card" style="margin-top:8px"><b>'+esc(v.title)+'</b><div style="position:relative;padding-top:56.25%;margin-top:8px;border-radius:10px;overflow:hidden;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&modestbranding=1&playsinline=1" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>';
+  S.inPr=true;var w=ld('pt_w')||[];if(w.indexOf(id)<0){w.push(id);sv('pt_w',w)}if(S.vd){S.vd.watched=S.vd.watched||[];if(S.vd.watched.indexOf(id)<0)S.vd.watched.push(id)}rpc('portal_video_mark',{p_phone:S.me.phone,p_code:S.me.code,p_video:id}).catch(function(){});
+  $('body').innerHTML='<button class="g sm" onclick="vBack()">→ رجوع</button><div class="card" style="margin-top:8px"><b>'+esc(v.title)+'</b><div style="position:relative;padding-top:56.25%;margin-top:8px;border-radius:10px;overflow:hidden;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&modestbranding=1&playsinline=1" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>';
 }
+
+/* ---------- التنبيهات ---------- */
+var VAPID=''; /* الصق هنا مفتاح VAPID العام (شوف خطوات التنبيهات) */
+function b64u(x){var p='='.repeat((4-x.length%4)%4),b=(x+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+function pushOK(){return !!VAPID&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
+function pushOn(){
+  navigator.serviceWorker.register('sw.js').then(function(){return navigator.serviceWorker.ready}).then(function(reg){return Notification.requestPermission().then(function(p){if(p!=='granted')throw new Error('denied');return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)})})}).then(function(sub){return rpc('portal_push_save',{p_phone:S.me.phone,p_code:S.me.code,p_sub:sub.toJSON()})}).then(function(){sv('pt_push',1);alert('تم تفعيل التنبيهات ✅');home()}).catch(function(e){alert(String(e&&e.message)==='denied'?'لازم تسمح بالتنبيهات من إعدادات المتصفح':'تعذر تفعيل التنبيهات. على الآيفون لازم تثبّت الصفحة على الشاشة الرئيسية الأول.')})}
 
 /* ---------- حل الاختبار (مع حفظ الإجابات عند قطع النت) ---------- */
 function flush(){
