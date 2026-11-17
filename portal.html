@@ -17,7 +17,7 @@ button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:11px 16p
 button.g{background:#e2e8f0;color:#334155}button:disabled{opacity:.5}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .tabs{display:flex;gap:6px;margin:10px 0;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
-.tabs button{flex:1;background:#e2e8f0;color:#475569;padding:10px 4px;font-size:13px}
+.tabs{overflow-x:auto}.tabs button{flex:1 0 auto;white-space:nowrap;background:#e2e8f0;color:#475569;padding:10px 12px;font-size:13px}
 .tabs button.on{background:var(--p);color:#fff}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .m{color:var(--m);font-size:13px}.err{color:var(--bad);min-height:22px;font-size:14px}
@@ -80,20 +80,20 @@ function doLogin(){
 function load(){
   return rpc('exam_list',{p_phone:S.me.phone,p_code:S.me.code}).then(function(d){
     if(d.error){sv('pt_me',null);S.me=null;loginView(d.error);throw new Error(d.error)}
-    S.d=d;S.me.name=d.name||S.me.name;S.rev={};S.W=null;flush();
+    S.d=d;S.me.name=d.name||S.me.name;S.rev={};S.W=null;S.vd=null;flush();
     return rpc('portal_stats',{p_phone:S.me.phone,p_code:S.me.code}).then(function(s){S.st={};(Array.isArray(s)?s:[]).forEach(function(x){S.st[x.exam_id]=x})}).catch(function(){S.st={}});
   }).then(function(){home()});
 }
 function logout(){sv('pt_me',null);S.me=S.d=null;loginView()}
 
 /* ---------- الرئيسية ---------- */
-function avail(){return (S.d.exams||[]).filter(function(e){return e.in_progress||e.used<e.max_attempts})}
+function avail(){return (S.d.exams||[]).filter(function(e){return e.in_progress||(e.used<e.max_attempts&&!e.solved)})}
 function home(){
   clearInterval(S.tm);
   var av=avail(),seen=ld('pt_seen')||[],nw=av.filter(function(e){return seen.indexOf(e.id)<0});
   $('app').innerHTML='<div class="top card"><div><b>أهلاً '+esc(S.me.name||'')+' 👋</b><div class="m">بوابة الطالب</div></div><button class="g" onclick="logout()">خروج</button></div>'+
-  (nw.length&&S.tab!=='new'?'<div class="nb" onclick="tab(\'new\')"><span>🔔 '+(nw.length>1?nw.length+' اختبارات جديدة متاحة':'اختبار جديد: '+esc(nw[0].title))+'</span><span>افتح ←</span></div>':'')+'<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'+(av.length?' <span class="dot">'+av.length+'</span>':'')],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
-  ({new:tNew,old:tOld,err:tErr})[S.tab]();
+  (nw.length&&S.tab!=='new'?'<div class="nb" onclick="tab(\'new\')"><span>🔔 '+(nw.length>1?nw.length+' اختبارات جديدة متاحة':'اختبار جديد: '+esc(nw[0].title))+'</span><span>افتح ←</span></div>':'')+'<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'+(av.length?' <span class="dot">'+av.length+'</span>':'')],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي'],['vid','🎬 الفيديوهات']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
+  ({new:tNew,old:tOld,err:tErr,vid:tVid})[S.tab]();
 }
 function tab(t){S.tab=t;home()}
 
@@ -177,6 +177,37 @@ function pq(){
 }
 function pp(j,k,n){var P=S.P;if(P.shown)return;P.a[j]=k;var c=sp(P.l[P.i].it.correct),done=true;for(var x=0;x<n;x++)if(!P.a[x])done=false;if(done){P.shown=true;P.good=c.every(function(v,x){return P.a[x]===v});if(P.good)P.ok++;else P.bad.push(P.l[P.i])}pq()}
 function pn(){var P=S.P;P.i++;P.a=[];P.shown=false;pq()}
+
+/* ---------- 4) الفيديوهات ---------- */
+function ytId(u){var m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null}
+function wGet(){return ld('pt_w')||[]}
+function vFolder(id){return (S.vd.folders||[]).filter(function(f){return (f.parent_id||null)===(id||null)})}
+function vVids(id){return (S.vd.videos||[]).filter(function(v){return (v.folder_id||null)===(id||null)})}
+function vCnt(id){var n=vVids(id).length;vFolder(id).forEach(function(f){n+=vCnt(f.id)});return n}
+function vPathOf(id){var p=[],g=0;while(id&&g++<50){var f=(S.vd.folders||[]).find(function(x){return x.id===id});if(!f)break;p.unshift(f);id=f.parent_id}return p}
+function tVid(){
+  if(!S.vd){$('body').innerHTML='<div class="card m">⏳ جارٍ تحميل الفيديوهات...</div>';
+    rpc('portal_videos',{p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(r.error)throw new Error(r.error);S.vd=r;S.vp=null;S.vq='';tVid()}).catch(function(){$('body').innerHTML='<div class="card err">تعذر تحميل الفيديوهات. لو لسه ما شغّلتش ملف portal_update_3.sql، شغّله مرة واحدة في Supabase.</div>'});return}
+  var h='<input id="vq" placeholder="🔎 ابحث عن درس أو فيديو..." value="'+esc(S.vq||'')+'" oninput="S.vq=this.value;vRes()"><div id="vres"></div>';
+  $('body').innerHTML=h;vRes();
+}
+function vVidCard(v,path){var w=wGet().indexOf(v.id)>=0;return '<div class="card row" style="cursor:pointer" onclick="vPlay(\''+v.id+'\')"><div><b>▶️ '+esc(v.title)+'</b>'+(path?'<div class="m">'+esc(path)+'</div>':'')+'</div>'+(w?'<span class="bd hi">✅ شاهدته</span>':'')+'</div>'}
+function vRes(){
+  var q=(S.vq||'').trim().toLowerCase(),el=$('vres');if(!el)return;
+  if(q){
+    var fs=(S.vd.folders||[]).filter(function(f){return f.name.toLowerCase().indexOf(q)>=0}),vs=(S.vd.videos||[]).filter(function(v){return v.title.toLowerCase().indexOf(q)>=0});
+    el.innerHTML=(fs.length?fs.map(function(f){return '<div class="card row" style="cursor:pointer" onclick="vGo(\''+f.id+'\')"><b>📁 '+esc(f.name)+'</b><span class="m">'+vPathOf(f.id).map(function(p){return p.name}).slice(0,-1).join(' › ')+'</span></div>'}).join(''):'')+
+      vs.map(function(v){return vVidCard(v,vPathOf(v.folder_id).map(function(p){return p.name}).join(' › '))}).join('')||'<div class="card m" style="text-align:center">مفيش نتائج</div>';return}
+  var cur=S.vp||null,path=vPathOf(cur),fo=vFolder(cur),vs2=vVids(cur);
+  var cr='<div class="card m" style="padding:10px"><a href="#" onclick="vGo(null);return false">🏠 الفيديوهات</a>'+path.map(function(f){return ' › <a href="#" onclick="vGo(\''+f.id+'\');return false">'+esc(f.name)+'</a>'}).join('')+'</div>';
+  el.innerHTML=cr+fo.map(function(f){return '<div class="card row" style="cursor:pointer" onclick="vGo(\''+f.id+'\')"><b>📁 '+esc(f.name)+'</b><span class="m">'+vCnt(f.id)+' فيديو ←</span></div>'}).join('')+vs2.map(function(v){return vVidCard(v)}).join('')+(!fo.length&&!vs2.length?'<div class="card m" style="text-align:center">المجلد فاضي</div>':'');
+}
+function vGo(id){S.vp=id;S.vq='';tVid()}
+function vPlay(id){
+  var v=(S.vd.videos||[]).find(function(x){return x.id===id}),y=v&&ytId(v.url);if(!y)return;
+  var w=wGet();if(w.indexOf(id)<0){w.push(id);sv('pt_w',w)}
+  $('body').innerHTML='<button class="g sm" onclick="tVid()">→ رجوع</button><div class="card" style="margin-top:8px"><b>'+esc(v.title)+'</b><div style="position:relative;padding-top:56.25%;margin-top:8px;border-radius:10px;overflow:hidden;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/'+y+'?rel=0&modestbranding=1&playsinline=1" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>';
+}
 
 /* ---------- حل الاختبار (مع حفظ الإجابات عند قطع النت) ---------- */
 function flush(){
