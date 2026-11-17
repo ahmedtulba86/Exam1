@@ -25,7 +25,12 @@ button.g{background:#e2e8f0;color:#334155}button:disabled{opacity:.5}
 .st div{background:#eff6ff;border-radius:12px;padding:10px;text-align:center}.st b{display:block;font-size:22px;color:var(--p)}
 .bd{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
 .hi{background:#dcfce7;color:#166534}.mid{background:#fef3c7;color:#92400e}.lo{background:#fee2e2;color:#991b1b}
-.q img{max-width:100%;border-radius:10px;border:1px solid var(--b);display:block;margin:6px 0}
+.q img{max-width:100%;border-radius:10px;border:1px solid var(--b);display:block;margin:6px 0;min-height:160px;background:#f1f5f9}
+.nb{background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;font-weight:700}
+.dot{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:99px;background:#dc2626;color:#fff;font-size:11px;margin-right:4px}
+.bar{height:8px;border-radius:9px;background:#e2e8f0;overflow:hidden}.bar i{display:block;height:100%;background:#dc2626}
+.off{position:sticky;top:46px;z-index:7;background:#fee2e2;color:#991b1b;border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13px;font-weight:700;display:none}
+.sm{padding:6px 12px;min-height:34px;font-size:13px}
 .ch{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
 .ch button{background:#f1f5f9;color:#334155;border:2px solid #cbd5e1;font-size:18px}
 .ch button.s{background:var(--p);color:#fff;border-color:var(--p)}
@@ -75,24 +80,27 @@ function doLogin(){
 function load(){
   return rpc('exam_list',{p_phone:S.me.phone,p_code:S.me.code}).then(function(d){
     if(d.error){sv('pt_me',null);S.me=null;loginView(d.error);throw new Error(d.error)}
-    S.d=d;S.me.name=d.name||S.me.name;S.rev={};home();
-  });
+    S.d=d;S.me.name=d.name||S.me.name;S.rev={};S.W=null;flush();
+    return rpc('portal_stats',{p_phone:S.me.phone,p_code:S.me.code}).then(function(s){S.st={};(Array.isArray(s)?s:[]).forEach(function(x){S.st[x.exam_id]=x})}).catch(function(){S.st={}});
+  }).then(function(){home()});
 }
 function logout(){sv('pt_me',null);S.me=S.d=null;loginView()}
 
 /* ---------- الرئيسية ---------- */
+function avail(){return (S.d.exams||[]).filter(function(e){return e.in_progress||e.used<e.max_attempts})}
 function home(){
   clearInterval(S.tm);
+  var av=avail(),seen=ld('pt_seen')||[],nw=av.filter(function(e){return seen.indexOf(e.id)<0});
   $('app').innerHTML='<div class="top card"><div><b>أهلاً '+esc(S.me.name||'')+' 👋</b><div class="m">بوابة الطالب</div></div><button class="g" onclick="logout()">خروج</button></div>'+
-  '<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
+  (nw.length&&S.tab!=='new'?'<div class="nb" onclick="tab(\'new\')"><span>🔔 '+(nw.length>1?nw.length+' اختبارات جديدة متاحة':'اختبار جديد: '+esc(nw[0].title))+'</span><span>افتح ←</span></div>':'')+'<div class="tabs">'+[['new','🆕 الاختبارات الجديدة'+(av.length?' <span class="dot">'+av.length+'</span>':'')],['old','📊 اختباراتي القديمة'],['err','❌ أخطائي']].map(function(t){return '<button class="'+(S.tab===t[0]?'on':'')+'" onclick="tab(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div><div id="body"></div>';
   ({new:tNew,old:tOld,err:tErr})[S.tab]();
 }
 function tab(t){S.tab=t;home()}
 
 /* ---------- 1) الاختبارات الجديدة ---------- */
 function tNew(){
-  var now=Date.parse(S.d.now)||Date.now();
-  var list=(S.d.exams||[]).filter(function(e){return e.in_progress||e.used<e.max_attempts});
+  var now=Date.parse(S.d.now)||Date.now(),list=avail();
+  sv('pt_seen',(S.d.exams||[]).map(function(e){return e.id}));
   $('body').innerHTML=list.length?list.map(function(e){
     var soon=e.opens_at&&Date.parse(e.opens_at)>now;
     return '<div class="card"><div class="row"><div><b>'+esc(e.title)+'</b><div class="m">'+e.count+' سؤال · '+e.duration_min+' دقيقة · محاولات: '+e.used+'/'+e.max_attempts+(e.closes_at?' · يغلق '+dt(e.closes_at):'')+'</div></div>'+
@@ -110,65 +118,95 @@ function tOld(){
   var trend=asc.length>1?(asc[asc.length-1]>=asc[0]?'📈 في تحسّن':'📉 محتاج مجهود'):'';
   $('body').innerHTML='<div class="card"><h3>إحصائياتي</h3><div class="st"><div><b>'+R.length+'</b>اختبار</div><div><b>'+avg+'%</b>المتوسط</div><div><b>'+Math.max.apply(0,P)+'%</b>أعلى نتيجة</div><div><b>'+Math.min.apply(0,P)+'%</b>أقل نتيجة</div></div>'+
   '<div class="m">تطور مستواي '+trend+'</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;background:#f8fafc;border-radius:10px"><polyline fill="none" stroke="#1e40af" stroke-width="2.5" points="'+line+'"/>'+pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#1e40af"/>'}).join('')+'</svg></div>'+
-  R.map(function(r){return '<div class="card row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+fm(r.score)+' من '+r.total+'</div></div><div class="row">'+bd(pc(r))+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'}).join('');
+  R.map(function(r){var s=(S.st||{})[r.exam_id],mine=pc(r),cmp='';
+    if(s){var d=mine-s.avg;cmp='<div class="m" style="margin-top:6px">🏅 ترتيبك <b>'+s.rank+'</b> من '+s.n+' · متوسط الدفعة <b>'+fm(s.avg)+'%</b> · أعلى درجة <b>'+fm(s.top)+'</b> '+(d>=0?'<span class="bd hi">فوق المتوسط</span>':'<span class="bd lo">تحت المتوسط</span>')+'</div>'}
+    return '<div class="card"><div class="row"><div><b>'+esc(r.title)+'</b><div class="m">'+dt(r.at)+' · '+fm(r.score)+' من '+r.total+'</div></div><div class="row">'+bd(mine)+(r.review?'<button class="g" onclick="review(\''+r.exam_id+'\')">مراجعة</button>':'')+'</div></div>'+cmp+'</div>'}).join('');
 }
-function getRev(id){return S.rev[id]?Promise.resolve(S.rev[id]):rpc('exam_review',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error)S.rev[id]=r;return r})}
 function eimgs(v){if(!v)return [];v=String(v).trim();if(v.charAt(0)==='['){try{return JSON.parse(v).filter(Boolean)}catch(e){}}return [v]}
-function item(it,i){
+function getRev(id){return S.rev[id]?Promise.resolve(S.rev[id]):rpc('exam_review',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(r){if(!r.error)S.rev[id]=r;return r})}
+function expHtml(it){return it.exp||eimgs(it.exp_img).length?'<div class="ex"><b>الشرح:</b> '+esc(it.exp||'')+eimgs(it.exp_img).map(function(p){return '<img src="'+img(p)+'" loading="lazy" decoding="async" style="max-width:100%;border-radius:8px;margin-top:6px;display:block">'}).join('')+'</div>':''}
+function item(it,i,tt){
   var c=sp(it.correct),m=sp(it.mine),ok=allOk(it),n=c.length;
   function part(j){var good=m[j]===c[j],mi=m[j]?(L[m[j]]||esc(m[j])):'لم تُجب';
     return '<div>'+(n>1?'<b>مطلوب '+(j+1)+':</b> '+(good?'✅ ':'❌ '):'')+'إجابتك: <b style="color:'+(good?'var(--ok)':'var(--bad)')+'">'+mi+'</b>'+(good?'':' · الصحيحة: <b style="color:var(--ok)">'+(L[c[j]]||esc(c[j]))+'</b>')+'</div>'}
-  return '<div class="card q '+(ok?'rt':'wr')+'"><b>سؤال '+(i+1)+'</b> '+(ok?'✅':'❌')+img(it.img).replace(/^(.+)$/,'<img src="$1" loading="lazy">')+
-  c.map(function(_,j){return part(j)}).join('')+
-  (it.exp||eimgs(it.exp_img).length?'<div class="ex"><b>الشرح:</b> '+esc(it.exp||'')+eimgs(it.exp_img).map(function(p){return '<img src="'+img(p)+'" loading="lazy" style="max-width:100%;border-radius:8px;margin-top:6px;display:block">'}).join('')+'</div>':'')+'</div>';
+  return '<div class="card q '+(ok?'rt':'wr')+'"><b>سؤال '+(i+1)+'</b> '+(ok?'✅':'❌')+(tt?' <span class="m">'+esc(tt)+'</span>':'')+'<img src="'+img(it.img)+'" loading="lazy" decoding="async">'+c.map(function(_,j){return part(j)}).join('')+expHtml(it)+'</div>';
 }
 function review(id){
   $('body').innerHTML='<div class="card m">⏳ جارٍ التحميل...</div>';
   getRev(id).then(function(r){
     if(r.error){$('body').innerHTML='<div class="card err">'+esc(r.error)+'</div>';return}
-    $('body').innerHTML='<button class="g" onclick="tab(\'old\')">→ رجوع</button><div class="card" style="margin-top:10px"><b>'+esc(r.title)+'</b> '+bd(pc(r))+'</div>'+(r.items||[]).map(item).join('');
+    $('body').innerHTML='<button class="g" onclick="tab(\'old\')">→ رجوع</button><div class="card" style="margin-top:10px"><b>'+esc(r.title)+'</b> '+bd(pc(r))+'</div>'+(r.items||[]).map(function(it,i){return item(it,i,it.topic)}).join('');
   });
 }
 
-/* ---------- 3) أخطائي ---------- */
+/* ---------- 3) أخطائي (بالتصنيف + تدريب) ---------- */
 function tErr(){
+  if(S.W){drawErr();return}
   var ids=[],seen={};(S.d.results||[]).forEach(function(r){if(r.review&&!seen[r.exam_id]){seen[r.exam_id]=1;ids.push(r.exam_id)}});
   if(!ids.length){$('body').innerHTML='<div class="card m" style="text-align:center">مفيش اختبارات متاحة للمراجعة لسه</div>';return}
   $('body').innerHTML='<div class="card m">⏳ جارٍ تجميع أخطائك...</div>';
   Promise.all(ids.map(getRev)).then(function(rs){
-    var h='',n=0;
-    rs.forEach(function(r){
-      if(!r||r.error)return;
-      var w=(r.items||[]).map(function(it,i){return [it,i]}).filter(function(x){return !allOk(x[0])});
-      if(!w.length)return;n+=w.length;
-      h+='<h3 style="margin-top:14px">'+esc(r.title)+' <span class="bd lo">'+w.length+' خطأ</span></h3>'+w.map(function(x){return item(x[0],x[1])}).join('');
-    });
-    $('body').innerHTML=n?'<div class="card"><b>إجمالي أخطائك: '+n+' سؤال</b><div class="m">راجع الإجابة الصحيحة والشرح عشان ما تكررهاش 💪</div></div>'+h:'<div class="card" style="text-align:center">🎉 ما عندكش أخطاء! ممتاز</div>';
+    var W=[],tot={};
+    rs.forEach(function(r){if(!r||r.error)return;(r.items||[]).forEach(function(it,i){var tp=it.topic||'غير مصنّف';tot[tp]=(tot[tp]||0)+1;if(!allOk(it))W.push({it:it,i:i,t:r.title,tp:tp})})});
+    S.W=W;S.tot=tot;drawErr();
   });
 }
+function setEm(m){S.em=m;drawErr()}
+function drawErr(){
+  var W=S.W,mode=S.em||'topic';
+  if(!W.length){$('body').innerHTML='<div class="card" style="text-align:center">🎉 ما عندكش أخطاء! ممتاز</div>';return}
+  var by={},keys=[];W.forEach(function(w){var k=mode==='topic'?w.tp:w.t;if(!by[k]){by[k]=[];keys.push(k)}by[k].push(w)});
+  if(mode==='topic')keys.sort(function(a,b){return by[b].length/S.tot[b]-by[a].length/S.tot[a]});
+  var h='<div class="card"><b>إجمالي أخطائك: '+W.length+' سؤال</b><div class="row" style="margin-top:8px"><div class="row"><button class="sm '+(mode==='topic'?'':'g')+'" onclick="setEm(\'topic\')">حسب الباب</button><button class="sm '+(mode==='exam'?'':'g')+'" onclick="setEm(\'exam\')">حسب الاختبار</button></div><button class="sm" style="background:#16a34a" onclick="practice(0)">🎯 تدرّب على أخطائك ('+W.length+')</button></div></div>';
+  if(mode==='topic')h+='<div class="card"><b>أضعف الأبواب عندك</b>'+keys.map(function(k){var r=Math.round(by[k].length/S.tot[k]*100);return '<div style="margin-top:9px"><div class="row"><span>'+esc(k)+'</span><span class="m">'+by[k].length+' غلط من '+S.tot[k]+' ('+r+'%)</span></div><div class="bar"><i style="width:'+r+'%"></i></div></div>'}).join('')+'</div>';
+  keys.forEach(function(k){h+='<h3 style="margin-top:14px">'+esc(k)+' <span class="bd lo">'+by[k].length+' خطأ</span> <button class="sm g" onclick="practice(\''+encodeURIComponent(k)+'\')">تدرّب</button></h3>'+by[k].map(function(w){return item(w.it,w.i,mode==='topic'?w.t:w.tp)}).join('')});
+  $('body').innerHTML=h;
+}
+/* تدريب: من غير درجة ومن غير حفظ */
+function practice(k){
+  var m=S.em||'topic',list=S.W.filter(function(w){return k===0||(m==='topic'?w.tp:w.t)===decodeURIComponent(k)});
+  list=list.slice().sort(function(){return Math.random()-.5});S.P={l:list,i:0,ok:0,bad:[],a:[],shown:false};pq();
+}
+function pq(){
+  var P=S.P;
+  if(P.i>=P.l.length){$('body').innerHTML='<div class="card" style="text-align:center"><h2>'+(P.ok===P.l.length?'🎉':'💪')+' خلصت التدريب</h2><div style="font-size:22px"><b>'+P.ok+'</b> صح من '+P.l.length+'</div><div class="row" style="justify-content:center;margin-top:12px">'+(P.bad.length?'<button onclick="S.P={l:S.P.bad.slice(),i:0,ok:0,bad:[],a:[],shown:false};pq()">أعد الأغلاط ('+P.bad.length+')</button>':'')+'<button class="g" onclick="drawErr()">رجوع لأخطائي</button></div></div>';return}
+  var w=P.l[P.i],it=w.it,c=sp(it.correct),n=c.length;
+  $('body').innerHTML='<div class="row"><button class="g sm" onclick="drawErr()">→ خروج</button><span class="m">تدريب '+(P.i+1)+' / '+P.l.length+'</span></div><div class="card q" style="margin-top:8px"><span class="m">'+esc(w.tp)+'</span><img src="'+img(it.img)+'" decoding="async">'+
+  c.map(function(cv,j){var sel=P.a[j];return (n>1?'<div class="m" style="margin-top:8px"><b>مطلوب '+(j+1)+'</b></div>':'')+'<div class="ch">'+Object.keys(L).map(function(k){var st='';if(P.shown){if(k===cv)st=' style="background:#16a34a;color:#fff;border-color:#16a34a"';else if(k===sel)st=' style="background:#dc2626;color:#fff;border-color:#dc2626"'}return '<button class="'+(!P.shown&&sel===k?'s':'')+'"'+st+(P.shown?' disabled':'')+' onclick="pp('+j+',\''+k+'\','+n+')">'+L[k]+'</button>'}).join('')+'</div>'}).join('')+
+  (P.shown?(P.good?'<div style="color:var(--ok);font-weight:800;margin-top:8px">✅ أحسنت!</div>':'<div style="color:var(--bad);font-weight:800;margin-top:8px">❌ راجع الإجابة الصحيحة</div>')+expHtml(it)+'<button style="width:100%;margin-top:10px" onclick="pn()">'+(P.i+1<P.l.length?'السؤال التالي ←':'إنهاء')+'</button>':'')+'</div>';
+}
+function pp(j,k,n){var P=S.P;if(P.shown)return;P.a[j]=k;var c=sp(P.l[P.i].it.correct),done=true;for(var x=0;x<n;x++)if(!P.a[x])done=false;if(done){P.shown=true;P.good=c.every(function(v,x){return P.a[x]===v});if(P.good)P.ok++;else P.bad.push(P.l[P.i])}pq()}
+function pn(){var P=S.P;P.i++;P.a=[];P.shown=false;pq()}
 
-/* ---------- حل الاختبار ---------- */
+/* ---------- حل الاختبار (مع حفظ الإجابات عند قطع النت) ---------- */
+function flush(){
+  var pd=ld('pt_pend');if(!pd||!S.me)return Promise.resolve();
+  return rpc('exam_submit',{p_attempt:pd.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:pd.ans,p_leaves:pd.leaves}).then(function(){sv('pt_pend',null);sv('pt_a_'+pd.attempt,null)}).catch(function(){});
+}
+window.addEventListener('online',function(){flush()});
 function startExam(id,resume){
   if(!resume&&!confirm('هتبدأ الاختبار والوقت هيشتغل فوراً. متأكد؟'))return;
   $('body').innerHTML='<div class="card m">⏳ جارٍ تحميل الاختبار...</div>';
   rpc('exam_start',{p_exam:id,p_phone:S.me.phone,p_code:S.me.code}).then(function(x){
     if(x.error){alert(x.error);return load()}
-    var ans=x.answers||{},leaves=0,done=false,off=(Date.parse(x.now)||Date.now())-Date.now(),end=Date.parse(x.started_at)+x.duration_min*60000;
-    $('app').innerHTML='<div class="tm row"><span>'+esc(x.title)+'</span><span id="tl">--:--</span></div><div id="qs"></div><button id="sub" style="width:100%;margin:6px 0 30px">تسليم الاختبار</button>';
-    function draw(){$('qs').innerHTML=x.questions.map(function(q,i){var n=q.n||1,cur=sp(ans[q.id]);return '<div class="card q"><b>سؤال '+(i+1)+' من '+x.questions.length+'</b><img src="'+img(q.img)+'">'+Array.apply(0,Array(n)).map(function(_,j){return (n>1?'<div class="m" style="margin-top:8px"><b>مطلوب '+(j+1)+'</b></div>':'')+'<div class="ch">'+Object.keys(L).map(function(k){return '<button class="'+(cur[j]===k?'s':'')+'" onclick="pick(\''+q.id+'\','+j+',\''+k+'\','+n+')">'+L[k]+'</button>'}).join('')+'</div>'}).join('')+'</div>'}).join('')}
-    var sT;window.pick=function(q,j,k,n){if(done)return;var cur=sp(ans[q]);while(cur.length<n)cur.push('');cur[j]=k;ans[q]=n>1?cur.join(','):k;draw();clearTimeout(sT);sT=setTimeout(function(){rpc('exam_save',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans}).catch(function(){})},600)};
+    var key='pt_a_'+x.attempt,ans=Object.assign({},x.answers||{},ld(key)||{}),leaves=0,done=false,dirty=!!ld(key),off=(Date.parse(x.now)||Date.now())-Date.now(),end=Date.parse(x.started_at)+x.duration_min*60000,sT,busy=false;
+    $('app').innerHTML='<div class="tm row"><span>'+esc(x.title)+'</span><span id="tl">--:--</span></div><div class="off" id="off">📡 لا يوجد اتصال — إجاباتك محفوظة على جهازك وهتتبعت أول ما النت يرجع</div><div id="qs"></div><button id="sub" style="width:100%;margin:6px 0 30px">تسليم الاختبار</button>';
+    function draw(){$('qs').innerHTML=x.questions.map(function(q,i){var n=q.n||1,cur=sp(ans[q.id]);return '<div class="card q"><b>سؤال '+(i+1)+' من '+x.questions.length+'</b><img src="'+img(q.img)+'" loading="lazy" decoding="async">'+Array.apply(0,Array(n)).map(function(_,j){return (n>1?'<div class="m" style="margin-top:8px"><b>مطلوب '+(j+1)+'</b></div>':'')+'<div class="ch">'+Object.keys(L).map(function(k){return '<button class="'+(cur[j]===k?'s':'')+'" onclick="pick(\''+q.id+'\','+j+',\''+k+'\','+n+')">'+L[k]+'</button>'}).join('')+'</div>'}).join('')+'</div>'}).join('')}
+    function net(ok){$('off').style.display=ok?'none':'block'}
+    function push(){if(busy||done||!dirty)return;busy=true;var snap=JSON.stringify(ans);rpc('exam_save',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans}).then(function(){busy=false;if(JSON.stringify(ans)===snap)dirty=false;net(true)}).catch(function(){busy=false;net(false)})}
+    window.pick=function(q,j,k,n){if(done)return;var cur=sp(ans[q]);while(cur.length<n)cur.push('');cur[j]=k;ans[q]=n>1?cur.join(','):k;sv(key,ans);dirty=true;var y=window.scrollY;draw();window.scrollTo(0,y);clearTimeout(sT);sT=setTimeout(push,600)};
+    function finish(r){sv(key,null);sv('pt_pend',null);alert(r&&r.score!=null?'تم التسليم ✅\nدرجتك: '+fm(r.score)+' من '+r.total:'تم التسليم ✅');S.tab='old';return load()}
     function submit(auto){
       if(done)return;if(!auto){var left=x.questions.filter(function(q){var c=sp(ans[q.id]),n=q.n||1;for(var j=0;j<n;j++)if(!c[j])return true;return false}).length;if(!confirm(left?'لسه '+left+' سؤال من غير إجابة. تسلّم؟':'تأكيد تسليم الاختبار؟'))return}
-      done=true;clearInterval(S.tm);$('sub').disabled=true;
-      rpc('exam_submit',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans,p_leaves:leaves}).then(function(r){
-        alert(r.score!=null?'تم التسليم ✅\nدرجتك: '+fm(r.score)+' من '+r.total:'تم التسليم ✅');S.tab='old';return load();
-      }).catch(function(){done=false;$('sub').disabled=false;alert('تعذر التسليم، تأكد من النت وجرّب تاني')});
+      done=true;clearInterval(S.tm);$('sub').disabled=true;sv(key,ans);sv('pt_pend',{attempt:x.attempt,ans:ans,leaves:leaves});
+      (function go(){rpc('exam_submit',{p_attempt:x.attempt,p_phone:S.me.phone,p_code:S.me.code,p_answers:ans,p_leaves:leaves}).then(finish).catch(function(){net(false);$('sub').textContent='⏳ مستني النت عشان يتسلّم... إجاباتك محفوظة';setTimeout(go,4000)})})();
     }
     $('sub').onclick=function(){submit(false)};
     document.onvisibilitychange=function(){if(document.hidden&&!done)leaves++};
-    S.tm=setInterval(function(){var s=Math.max(0,Math.floor((end-(Date.now()+off))/1000));$('tl').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s<=0)submit(true)},500);
-    draw();
-  }).catch(function(){alert('تعذر فتح الاختبار');load()});
+    window.ononline=function(){push()};
+    S.tm=setInterval(function(){var s=Math.max(0,Math.floor((end-(Date.now()+off))/1000));$('tl').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);if(s<=0)submit(true);else if(dirty&&Date.now()%8000<600)push()},500);
+    draw();if(dirty)push();
+  }).catch(function(){alert('تعذر فتح الاختبار، تأكد من النت وجرّب تاني');load().catch(function(){})});
 }
 
 /* ---------- تشغيل ---------- */
