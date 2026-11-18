@@ -227,7 +227,7 @@ function vPlay(id){
 }
 
 /* ---------- التنبيهات ---------- */
-var VAPID=''; /* الصق هنا مفتاح VAPID العام (شوف خطوات التنبيهات) */
+var VAPID='BHWCa_1qPcS5MHHgaP8hG3-I-es2OJ8YXHk0838CsKITqPBxBIJlpe8KZxjFyWiOCWJGW-glwGhri_Wl7soQXxo'; /* الصق هنا مفتاح VAPID العام (شوف خطوات التنبيهات) */
 function b64u(x){var p='='.repeat((4-x.length%4)%4),b=(x+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushOK(){return !!VAPID&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
 function pushOn(){
