@@ -11546,7 +11546,7 @@ function weakTopic(r){if(!r.at||!r.at.answers)return '—';var w={};D.qs.forEach
 /* ---- الواجهة: الشريط واللوحة ---- */
 var BTNS=[['hard','🔥 أصعب الأسئلة + 🖥️ السبورة'],['race','🏇 سباق التفوق'],['parents','📲 تقارير أولياء الأمور'],['absent','⚠️ الغائبون'],['post','📋 بوست الأوائل'],['csv','📊 Excel'],['print','🖨️ طباعة'],['ann','📢 إعلان'],['sync','🔄 مزامنة المجموعات'],['photos','📸 أوراق الحل']];
 function build(){
-  if($('jx3Wrap'))return;
+  if($('jx3Wrap'))return $('jx3Wrap');
   var w=document.createElement('div');w.className='card';w.id='jx3Wrap';
   w.innerHTML='<div style="font-weight:800;margin-bottom:8px">⚡ شريط الأدوات السريع ومركز التقارير <span style="font-size:11px;color:#64748b;font-weight:400">(اسحب يمينًا ويسارًا)</span></div>'+
   '<div id="jx3Bar" style="display:flex;gap:8px;overflow-x:auto;touch-action:pan-x;-webkit-overflow-scrolling:touch;padding:4px 2px 10px;scrollbar-width:thin">'+
@@ -11558,6 +11558,7 @@ function build(){
   w.querySelector('#jx3Exam').onchange=syncReq;
   var gs=(st().groups||[]);w.querySelector('#jx3Scope').innerHTML='<option value="ALL">كل الدفعة</option>'+gs.map(function(g){return '<option>'+esc(g)+'</option>';}).join('');
   loadExams().then(function(r){w.querySelector('#jx3Exam').innerHTML=r.map(function(e){return '<option value="'+e.id+'">'+esc(e.title)+'</option>';}).join('');syncReq();}).catch(function(e){w.querySelector('#jx3Out').innerHTML='<div style="color:#dc2626">تعذر تحميل الاختبارات: '+esc(e.message)+'</div>';});
+  return w;
 }
 function syncReq(){var id=$('jx3Exam').value,e=(D.ex||[]).filter(function(x){return x.id===id;})[0];$('jx3Req').checked=!!(e&&e.require_work_photos);}
 function toast(t){if(window.__app&&window.__app.toast)window.__app.toast(t);else alert(t);}
@@ -11638,8 +11639,8 @@ function photos(){
 function place(){
   var w=$('jx3Wrap'),qr=$('qcRoot'),qt=$('qcTab'),vis=qt&&qt.offsetParent!==null&&qr&&qr.children.length;
   if(vis){var pb=$('qcQuickPatchBar'),ref=(pb&&pb.parentNode===qr)?pb.nextSibling:qr.firstChild;
-    if(!w||w.parentNode!==qr||(pb&&w.previousSibling!==pb)){if(!w){build();w=$('jx3Wrap');}if(w)qr.insertBefore(w,ref);}return;}
-  var a=$('qv21Tools');if(a&&a.offsetParent!==null){if(!w){build();w=$('jx3Wrap');}if(w&&w.previousSibling!==a)a.parentNode.insertBefore(w,a.nextSibling);}
+    if(!w||w.parentNode!==qr||(pb&&w.previousSibling!==pb)){if(!w)w=build();if(w)qr.insertBefore(w,ref);}return;}
+  var a=$('qv21Tools');if(a&&a.offsetParent!==null){if(!w)w=build();if(w&&w.previousSibling!==a)a.parentNode.insertBefore(w,a.nextSibling);}
 }
 setInterval(place,1000);
 })();
