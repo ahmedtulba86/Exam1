@@ -11553,11 +11553,11 @@ function build(){
   BTNS.map(function(b){return '<button type="button" data-k="'+b[0]+'" style="flex:0 0 auto;white-space:nowrap;background:var(--primary);color:#fff;border:0;border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer">'+b[1]+'</button>';}).join('')+'</div>'+
   '<div class="form-row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><select id="jx3Exam" style="flex:1;min-width:180px"></select><select id="jx3Scope"><option value="ALL">كل الدفعة</option></select>'+
   '<label style="font-size:13px"><input type="checkbox" id="jx3Req"> تصوير ورقة الحل لهذا الاختبار</label></div><div id="jx3Out" style="margin-top:10px"></div>';
-  $('jx3Bar').onclick=function(e){var b=e.target.closest('button');if(b)run(b.getAttribute('data-k'));};
-  $('jx3Req').onchange=function(){var c=this.checked,id=$('jx3Exam').value;if(!id)return;api('PATCH','exams?id=eq.'+id,{require_work_photos:c},'return=minimal').then(function(){D.ex.forEach(function(e){if(e.id===id)e.require_work_photos=c;});toast(c?'تم تفعيل تصوير ورقة الحل':'تم إلغاء تصوير ورقة الحل');}).catch(function(e){alert('تعذر الحفظ — شغّل ملف SQL أولًا. '+e.message);});};
-  $('jx3Exam').onchange=syncReq;
-  var gs=(st().groups||[]);$('jx3Scope').innerHTML='<option value="ALL">كل الدفعة</option>'+gs.map(function(g){return '<option>'+esc(g)+'</option>';}).join('');
-  loadExams().then(function(r){$('jx3Exam').innerHTML=r.map(function(e){return '<option value="'+e.id+'">'+esc(e.title)+'</option>';}).join('');syncReq();}).catch(function(e){$('jx3Out').innerHTML='<div style="color:#dc2626">تعذر تحميل الاختبارات: '+esc(e.message)+'</div>';});
+  w.querySelector('#jx3Bar').onclick=function(e){var b=e.target.closest('button');if(b)run(b.getAttribute('data-k'));};
+  w.querySelector('#jx3Req').onchange=function(){var c=this.checked,id=w.querySelector('#jx3Exam').value;if(!id)return;api('PATCH','exams?id=eq.'+id,{require_work_photos:c},'return=minimal').then(function(){D.ex.forEach(function(e){if(e.id===id)e.require_work_photos=c;});toast(c?'تم تفعيل تصوير ورقة الحل':'تم إلغاء تصوير ورقة الحل');}).catch(function(e){alert('تعذر الحفظ — شغّل ملف SQL أولًا. '+e.message);});};
+  w.querySelector('#jx3Exam').onchange=syncReq;
+  var gs=(st().groups||[]);w.querySelector('#jx3Scope').innerHTML='<option value="ALL">كل الدفعة</option>'+gs.map(function(g){return '<option>'+esc(g)+'</option>';}).join('');
+  loadExams().then(function(r){w.querySelector('#jx3Exam').innerHTML=r.map(function(e){return '<option value="'+e.id+'">'+esc(e.title)+'</option>';}).join('');syncReq();}).catch(function(e){w.querySelector('#jx3Out').innerHTML='<div style="color:#dc2626">تعذر تحميل الاختبارات: '+esc(e.message)+'</div>';});
 }
 function syncReq(){var id=$('jx3Exam').value,e=(D.ex||[]).filter(function(x){return x.id===id;})[0];$('jx3Req').checked=!!(e&&e.require_work_photos);}
 function toast(t){if(window.__app&&window.__app.toast)window.__app.toast(t);else alert(t);}
