@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>عصير الكتب | بوابة الطالب</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e40af">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="عصير الكتب">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--primary:#1e40af;--primary-light:#eff6ff;--secondary:#0f766e;--bg:#f1f5f9;--card:#fff;--text:#1e293b;--border:#cbd5e1;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--purple:#7e22ce}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:env(safe-area-inset-bottom)}
+header{background:var(--primary);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+header b{font-size:18px}header small{display:block;opacity:.85;font-size:12px}
+.wrap{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
+button,.btn{background:var(--primary);color:#fff;border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
+button.sec{background:var(--primary-light);color:var(--primary);border:1px solid var(--border)}button.ok{background:var(--success)}button.bad{background:var(--danger)}button.pur{background:var(--purple)}button:disabled{opacity:.5}
+input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font:inherit;margin:6px 0}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:4}
+.tabs button{flex:1;white-space:nowrap;background:var(--primary-light);color:var(--primary)}.tabs button.on{background:var(--primary);color:#fff}
+#ann{background:#fef3c7;color:#92400e;padding:10px 14px;font-weight:700;text-align:center;border-bottom:2px solid var(--warning)}
+#inst{position:fixed;bottom:0;left:0;right:0;background:var(--primary);color:#fff;padding:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;z-index:20}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}
+.opt{display:flex;gap:6px;margin-top:6px}.opt button{flex:1;background:#fff;color:var(--text);border:2px solid var(--border)}.opt button.s{background:var(--primary);color:#fff;border-color:var(--primary)}
+.opt button.r{background:var(--success);color:#fff;border-color:var(--success)}.opt button.w{background:var(--danger);color:#fff;border-color:var(--danger)}
+.qi{width:100%;border:1px solid var(--border);border-radius:10px;background:#fff}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto}
+.bar{height:10px;background:#e2e8f0;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--danger)}
+.pill{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:999px;padding:2px 10px;font-size:12px;margin:2px}
+#timer{position:sticky;top:0;background:var(--primary);color:#fff;text-align:center;font-size:22px;font-weight:800;padding:8px;z-index:6}
+</style>
+</head>
+<body>
+<div id="ann" hidden></div>
+<div id="login" class="wrap" hidden>
+  <div class="card" style="margin-top:8vh;text-align:center">
+    <div style="font-size:46px">📚</div><h2 style="color:var(--primary);margin:4px 0">عصير الكتب</h2>
+    <p style="color:#64748b;margin-top:0">بوابة الطالب — سجّل دخولك</p>
+    <input id="lp" type="tel" inputmode="numeric" placeholder="رقم الهاتف" autocomplete="tel">
+    <input id="lc" type="text" placeholder="كود الطالب" autocomplete="off">
+    <button id="lg" style="width:100%;margin-top:6px">دخول</button><div id="lm" style="color:var(--danger);margin-top:8px"></div>
+  </div>
+</div>
+<div id="app" hidden>
+  <header><div><b>📚 عصير الكتب</b><small id="who"></small></div><button class="sec" id="lo">خروج</button></header>
+  <div class="tabs" id="tabs">
+    <button data-t="new" class="on">📝 اختبارات جديدة</button><button data-t="old">📊 اختباراتي</button><button data-t="mis">❌ أخطائي</button><button data-t="vid">🎬 فيديوهات</button>
+  </div>
+  <div class="wrap" id="main"></div>
+</div>
+<div id="run" class="ov" hidden></div>
+<div id="inst" hidden><span id="instT">ثبّت التطبيق على هاتفك للدخول السريع</span><span><button id="instB" class="sec">تثبيت</button> <button id="instX" class="sec">✕</button></span></div>
+<script>
+(function(){
+'use strict';
+var SB='https://nmcmhlqstkfhsvnyeeod.supabase.co',KEY='sb_publishable_n_zipcibBGa0RbW6xMloFw_S5Zt0qqH',BK='question-images',AR={a:'أ',b:'ب',c:'ج',d:'د'};
+var C=null,H=null,TAB='new';
+function $(i){return document.getElementById(i);}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function dg(v){return String(v||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}).replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d);}).replace(/\D/g,'');}
+function rpc(n,a){return fetch(SB+'/rest/v1/rpc/'+n,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(a)}).then(function(r){return r.text().then(function(t){var j=t?JSON.parse(t):null;if(!r.ok)throw new Error((j&&j.message)||'تعذر الاتصال');if(j&&j.error)throw new Error(j.error);return j;});});}
+function cr(x){return Object.assign({p_phone:C.phone,p_code:C.code},x||{});}
+function img(p){return SB+'/storage/v1/object/public/'+BK+'/'+p;}
+function pc(s,t){return t?Math.round(s/t*100):0;}
+function lvl(a){return a>=90?'متفوق 🌟':a>=75?'جيد جدًا 👍':a>=60?'جيد':'يحتاج دعم 💪';}
+function vurl(v){return v&&(v.url||v.youtube_url||v.link||'');}
+function yt(u){var m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+
+/* ---------- الدخول ---------- */
+function showLogin(m){$('app').hidden=true;$('login').hidden=false;$('lm').textContent=m||'';}
+function login(phone,code,silent){
+  return rpc('student_login_v3',{p_phone:phone,p_code:code}).then(function(s){C={phone:phone,code:code,name:s.name};try{localStorage.setItem('aseer_stu',JSON.stringify(C));}catch(e){}$('login').hidden=true;$('app').hidden=false;$('who').textContent=s.name+(s.group?' — '+s.group:'');tab('new');}).catch(function(e){if(!silent)$('lm').textContent=e.message;else showLogin();});
+}
+$('lg').onclick=function(){var p=dg($('lp').value),c=$('lc').value.trim();if(!p||!c)return($('lm').textContent='أدخل الهاتف والكود');$('lm').textContent='جارٍ الدخول...';login(p,c,false);};
+$('lo').onclick=function(){try{localStorage.removeItem('aseer_stu');}catch(e){}C=null;showLogin();};
+$('tabs').onclick=function(e){var b=e.target.closest('button');if(b)tab(b.dataset.t);};
+function tab(t){TAB=t;[].forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.t===t);});$('main').innerHTML='<div class="card">جارٍ التحميل...</div>';({new:vNew,old:vOld,mis:vMis,vid:vVid})[t]();}
+function fail(e){$('main').innerHTML='<div class="card" style="color:var(--danger)">'+esc(e.message)+'</div>';}
+function home(){return rpc('sp_home',cr()).then(function(h){H=h;var a=$('ann');if(h.ann){a.hidden=false;a.textContent='📢 '+h.ann;}else a.hidden=true;return h;});}
+
+/* ---------- A: اختبارات جديدة ---------- */
+function vNew(){home().then(function(h){
+  $('main').innerHTML=h['new'].length?h['new'].map(function(e,i){return '<div class="card"><b>'+esc(e.title)+'</b><div class="row" style="margin:6px 0"><span class="pill">⏱️ '+e.duration_min+' دقيقة</span>'+(e.require_work_photos?'<span class="pill">📸 يلزم تصوير ورقة الحل</span>':'')+'</div><button data-i="'+i+'" style="width:100%">ابدأ / تابع الاختبار</button></div>';}).join(''):'<div class="card">لا توجد اختبارات جديدة الآن 🎉</div>';
+  $('main').onclick=function(ev){var b=ev.target.closest('button[data-i]');if(b&&TAB==='new')start(H['new'][+b.dataset.i]);};
+}).catch(fail);}
+var X=null;
+function start(e){
+  if(!confirm('سيبدأ العدّاد الآن. هل أنت مستعد؟'))return;
+  rpc('exam_start',cr({p_exam:e.id})).then(function(r){
+    X={e:e,a:r.attempt,ans:r.answers||{},qs:r.questions||[],end:Date.parse(r.started_at)+r.duration_min*60000,off:Date.parse(r.now)-Date.now(),leaves:0,photos:[],t:null,sv:null,done:false};
+    drawExam(r.title);
+  }).catch(function(er){alert(er.message);});
+}
+function drawExam(title){
+  var o=$('run');o.hidden=false;
+  o.innerHTML='<div id="timer">--:--</div><div class="wrap"><h3>'+esc(title)+'</h3><div id="qs">'+X.qs.map(function(q,i){return '<div class="card"><b>سؤال '+(i+1)+'</b><img class="qi" src="'+img(q.img)+'" alt=""><div class="opt" data-q="'+q.id+'">'+['a','b','c','d'].map(function(k){return '<button data-k="'+k+'" class="'+(X.ans[q.id]===k?'s':'')+'">'+AR[k]+'</button>';}).join('')+'</div></div>';}).join('')+'</div>'+
+  '<div class="card" id="ph" '+(X.e.require_work_photos?'':'hidden')+'><b>📸 تصوير ورقة الحل</b><p style="font-size:13px;color:#64748b">صوّر ورقة الحل (من 1 إلى 5 صور) قبل التسليم.</p><input id="pf" type="file" accept="image/*" capture="environment" multiple><div id="pv" class="row"></div></div>'+
+  '<button class="ok" id="sb" style="width:100%;margin-bottom:30px">✅ تسليم الاختبار</button></div>';
+  o.onclick=function(ev){var b=ev.target.closest('.opt button');if(!b)return;var q=b.parentNode.dataset.q;X.ans[q]=b.dataset.k;[].forEach.call(b.parentNode.children,function(x){x.classList.toggle('s',x===b);});clearTimeout(X.sv);X.sv=setTimeout(save,700);};
+  $('pf').onchange=function(){var fs=[].slice.call(this.files);this.value='';(function nx(){var f=fs.shift();if(!f)return;if(X.photos.length>=5){alert('الحد الأقصى 5 صور');return;}comp(f).then(function(d){X.photos.push(d);pv();nx();});})();};
+  $('sb').onclick=function(){submit(false);};
+  X.t=setInterval(tick,1000);tick();
+}
+function pv(){$('pv').innerHTML=X.photos.map(function(p,i){return '<div style="position:relative"><img src="'+p+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px"><button data-d="'+i+'" class="bad" style="position:absolute;top:0;right:0;padding:0 6px">✕</button></div>';}).join('');[].forEach.call($('pv').querySelectorAll('button'),function(b){b.onclick=function(){X.photos.splice(+b.dataset.d,1);pv();};});}
+function comp(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1200/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.65));};im.src=r.result;};r.readAsDataURL(f);});}
+function save(){if(!X||X.done)return;rpc('exam_save',cr({p_attempt:X.a,p_answers:X.ans})).catch(function(){});}
+function tick(){var l=Math.max(0,Math.floor((X.end-(Date.now()+X.off))/1000));$('timer').textContent='⏱️ '+Math.floor(l/60)+':'+('0'+l%60).slice(-2);$('timer').style.background=l<60?'#dc2626':'';if(l<=0)submit(true);}
+document.addEventListener('visibilitychange',function(){if(X&&!X.done&&document.hidden){X.leaves++;save();}});
+function submit(auto){
+  if(!X||X.done)return;
+  if(!auto){if(X.e.require_work_photos&&X.photos.length<1)return alert('يجب تصوير ورقة الحل (صورة واحدة على الأقل) قبل التسليم');if(!confirm('تأكيد تسليم الاختبار؟'))return;}
+  X.done=true;clearInterval(X.t);$('sb')&&($('sb').disabled=true);
+  rpc('exam_submit_v3',cr({p_attempt:X.a,p_answers:X.ans,p_leaves:X.leaves,p_photos:X.photos.length?X.photos:null})).then(function(r){result(r);}).catch(function(e){X.done=false;X.t=setInterval(tick,1000);$('sb').disabled=false;alert(e.message);});
+}
+function result(r){
+  var o=$('run'),s=r.score!=null?r.score:null,t=r.total,p=s!=null?pc(s,t):null;
+  o.innerHTML='<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:50px">'+(p==null?'✅':p>=85?'🏆':'📘')+'</div><h2>تم التسليم</h2>'+(p!=null?'<div style="font-size:38px;font-weight:800;color:var(--primary)">'+s+' / '+t+'</div><div>'+p+'%</div>':'<p>تم تسليم اختبارك بنجاح.</p>')+'<div id="cb"></div><button id="rc" style="margin-top:12px;width:100%">رجوع</button></div></div>';
+  if(p!=null&&p>=85){$('cb').innerHTML='<button class="pur" id="cd" style="margin-top:10px">🎓 تحميل شهادة التقدير</button>';$('cd').onclick=function(){cert(C.name,X.e.title,p);};}
+  $('rc').onclick=function(){o.hidden=true;X=null;tab('new');};
+}
+function cert(name,title,p){
+  var c=document.createElement('canvas');c.width=1200;c.height=850;var x=c.getContext('2d');
+  x.fillStyle='#fffbeb';x.fillRect(0,0,1200,850);x.strokeStyle='#1e40af';x.lineWidth=14;x.strokeRect(30,30,1140,790);x.strokeStyle='#d97706';x.lineWidth=4;x.strokeRect(55,55,1090,740);
+  x.direction='rtl';x.textAlign='center';x.fillStyle='#1e40af';x.font='bold 46px Tahoma,Arial';x.fillText('📚 منصة عصير الكتب',600,150);
+  x.fillStyle='#b45309';x.font='bold 78px Tahoma,Arial';x.fillText('شهادة تقدير',600,270);
+  x.fillStyle='#334155';x.font='34px Tahoma,Arial';x.fillText('تشهد منصة عصير الكتب بتفوق الطالب/ة',600,360);
+  x.fillStyle='#1e293b';x.font='bold 64px Tahoma,Arial';x.fillText(name,600,460);
+  x.fillStyle='#334155';x.font='32px Tahoma,Arial';x.fillText('في اختبار «'+title+'»',600,540);x.fillText('بنسبة '+p+'%',600,600);
+  x.fillStyle='#0f766e';x.font='bold 32px Tahoma,Arial';x.fillText('نتمنى لك دوام التفوق والنجاح 🌟',600,690);x.fillStyle='#64748b';x.font='24px Tahoma,Arial';x.fillText(new Date().toLocaleDateString('ar-EG'),600,760);
+  var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='شهادة-'+name+'.png';document.body.appendChild(a);a.click();a.remove();
+}
+
+/* ---------- B: اختباراتي القديمة ---------- */
+function vOld(){home().then(function(h){
+  var b=h.batch;
+  $('main').innerHTML=(b?'<div class="card" style="background:var(--primary-light)"><b>مستواك العام: '+lvl(b.avg)+'</b><div>متوسطك '+b.avg+'% — ترتيبك في الدفعة '+b.rank+' من '+b.of+'</div></div>':'')+
+  (h.old.length?h.old.map(function(a,i){var p=pc(a.score,a.total);return '<div class="card"><b>'+esc(a.title)+'</b><div style="margin:6px 0"><span class="pill">الدرجة '+a.score+'/'+a.total+' ('+p+'%)</span><span class="pill">ترتيبك في الاختبار '+a.rank_exam+' من '+a.of_exam+'</span><span class="pill">في مجموعتك '+a.rank_group+'</span></div><div class="row"><button data-r="'+i+'">🔍 مراجعة</button><button class="pur" data-h="'+i+'">🏅 لوحة الشرف</button>'+(p>=85?'<button class="ok" data-c="'+i+'">🎓 الشهادة</button>':'')+'</div><div id="x'+i+'"></div></div>';}).join(''):'<div class="card">لا توجد اختبارات سابقة.</div>');
+  $('main').onclick=function(ev){var b=ev.target.closest('button');if(!b||TAB!=='old')return;var d=b.dataset;
+    if(d.c!=null){var a=H.old[+d.c];cert(C.name,a.title,pc(a.score,a.total));}
+    if(d.r!=null)review(+d.r);if(d.h!=null)honor(+d.h,'batch');};
+}).catch(fail);}
+function review(i){var a=H.old[i],box=$('x'+i);box.innerHTML='جارٍ التحميل...';rpc('sp_review',cr({p_attempt:a.attempt})).then(function(r){
+  box.innerHTML=r.questions.map(function(q,n){var ok=q.mine===q.correct;return '<div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:6px"><b>'+(n+1)+'</b> '+(ok?'✅':'❌')+' <span class="pill">'+esc(q.topic||'')+'</span><img class="qi" src="'+img(q.img)+'"><div>إجابتك: <b>'+(AR[q.mine]||'—')+'</b> — الصحيحة: <b style="color:var(--success)">'+AR[q.correct]+'</b></div></div>';}).join('');}).catch(function(e){box.textContent=e.message;});}
+function honor(i,sc){var a=H.old[i],box=$('x'+i);box.innerHTML='جارٍ التحميل...';rpc('sp_honor',cr({p_exam:a.exam_id,p_scope:sc})).then(function(r){
+  var M=['🥇','🥈','🥉'];box.innerHTML='<div class="row" style="margin:8px 0"><button class="'+(sc==='batch'?'':'sec')+'" data-hb="'+i+'">أوائل الدفعة</button><button class="'+(sc==='group'?'':'sec')+'" data-hg="'+i+'">أوائل مجموعتي</button></div>'+r.map(function(x){return '<div class="row" style="border-top:1px solid #e2e8f0;padding:5px 0"><span>'+(M[x.rank-1]||'🎖️ '+x.rank)+'</span><b class="sp">'+esc(x.name)+'</b><span>'+x.score+'/'+x.total+'</span></div>';}).join('');
+  box.querySelector('[data-hb]').onclick=function(){honor(i,'batch');};box.querySelector('[data-hg]').onclick=function(){honor(i,'group');};}).catch(function(e){box.textContent=e.message;});}
+
+/* ---------- C: أخطائي ---------- */
+var MS=null;
+function vMis(){rpc('sp_mistakes',cr()).then(function(m){MS=m;drawMis('topic');}).catch(fail);}
+function drawMis(by){
+  var m=MS,g={};m.mistakes.forEach(function(q){var k=by==='topic'?(q.topic||'غير مصنّف'):q.exam;(g[k]=g[k]||[]).push(q);});
+  $('main').innerHTML='<div class="card"><b>📉 أضعف الأبواب</b>'+(m.weak.length?m.weak.slice(0,6).map(function(w,i){var p=pc(w.wrong,w.total),u=vurl(w.video);return '<div style="margin:8px 0"><div class="row"><b class="sp">'+esc(w.topic)+'</b><span>'+w.wrong+' خطأ من '+w.total+' ('+p+'%)</span>'+(u?'<button class="pur" data-v="'+i+'">▶️ شرح</button>':'')+'</div><div class="bar"><i style="width:'+p+'%"></i></div></div>';}).join(''):'<div>لا توجد أخطاء 🎉</div>')+'</div>'+
+  (m.mistakes.length?'<div class="row"><button id="pr" class="ok sp">⚡ تدريب فوري على أخطائي ('+m.mistakes.length+')</button></div><div class="row" style="margin:8px 0"><button class="'+(by==='topic'?'':'sec')+'" id="gt">حسب الباب</button><button class="'+(by==='exam'?'':'sec')+'" id="ge">حسب الاختبار</button></div>':'')+
+  Object.keys(g).map(function(k){return '<div class="card"><b>'+esc(k)+' ('+g[k].length+')</b>'+g[k].map(function(q){return '<div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:6px"><img class="qi" src="'+img(q.img)+'"><div>إجابتك: <b>'+(AR[q.mine]||'—')+'</b> — الصحيحة: <b style="color:var(--success)">'+AR[q.correct]+'</b></div></div>';}).join('')+'</div>';}).join('');
+  if($('gt')){$('gt').onclick=function(){drawMis('topic');};$('ge').onclick=function(){drawMis('exam');};$('pr').onclick=practice;}
+  [].forEach.call($('main').querySelectorAll('[data-v]'),function(b){b.onclick=function(){play(m.weak[+b.dataset.v].video,m.weak[+b.dataset.v].topic);};});
+}
+function practice(){
+  var Q=MS.mistakes.slice().sort(function(){return Math.random()-.5;}),i=0,ok=0,o=$('run');o.hidden=false;
+  function show(){
+    if(i>=Q.length){o.innerHTML='<div class="wrap"><div class="card" style="text-align:center"><h2>انتهى التدريب 🎉</h2><div style="font-size:30px">'+ok+' / '+Q.length+'</div><button id="px" style="width:100%;margin-top:10px">إغلاق</button></div></div>';$('px').onclick=function(){o.hidden=true;};return;}
+    var q=Q[i];o.innerHTML='<div class="wrap"><div class="row"><b class="sp">تدريب '+(i+1)+' / '+Q.length+'</b><button class="sec" id="px">إنهاء</button></div><div class="card"><span class="pill">'+esc(q.topic||'')+'</span><img class="qi" src="'+img(q.img)+'"><div class="opt">'+['a','b','c','d'].map(function(k){return '<button data-k="'+k+'">'+AR[k]+'</button>';}).join('')+'</div><div id="fb" style="margin-top:10px;font-weight:700"></div></div></div>';
+    $('px').onclick=function(){o.hidden=true;};var done=false;
+    [].forEach.call(o.querySelectorAll('.opt button'),function(b){b.onclick=function(){if(done)return;done=true;var right=b.dataset.k===q.correct;if(right)ok++;b.classList.add(right?'r':'w');if(!right)o.querySelector('[data-k="'+q.correct+'"]').classList.add('r');$('fb').innerHTML=(right?'✅ أحسنت!':'❌ الصحيحة: '+AR[q.correct])+'<br><button id="nx" style="margin-top:8px;width:100%">التالي</button>';$('nx').onclick=function(){i++;show();};};});
+  }
+  show();
+}
+
+/* ---------- D: الفيديوهات ---------- */
+function play(v,t){var u=vurl(v),id=yt(u),o=$('run');o.hidden=false;
+  o.innerHTML='<div class="wrap"><div class="row"><b class="sp">🎬 '+esc(t||v.title||v.name||'')+'</b><button class="sec" id="vx">إغلاق</button></div>'+(id?'<div style="position:relative;padding-top:56.25%;margin-top:10px"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px" allow="accelerometer;encrypted-media;picture-in-picture" allowfullscreen></iframe></div>':'<div class="card">رابط الفيديو غير صالح</div>')+'</div>';$('vx').onclick=function(){o.hidden=true;o.innerHTML='';};}
+function vVid(){rpc('sp_videos',cr()).then(function(r){
+  var F={};r.folders.forEach(function(f){F[f.id]=f;});
+  $('main').innerHTML=r.videos.length?r.videos.map(function(v,i){var f=F[v.folder_id];return '<div class="card row"><span style="font-size:26px">▶️</span><div class="sp"><b>'+esc(v.title||v.name||'فيديو')+'</b>'+(f?'<div style="font-size:12px;color:#64748b">📁 '+esc(f.name)+'</div>':'')+'</div><button data-p="'+i+'">تشغيل</button></div>';}).join(''):'<div class="card">لا توجد فيديوهات حاليًا.</div>';
+  $('main').onclick=function(ev){var b=ev.target.closest('button[data-p]');if(b&&TAB==='vid')play(r.videos[+b.dataset.p]);};}).catch(fail);}
+
+/* ---------- PWA ---------- */
+var dp=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;if(!localStorage.getItem('aseer_inst_x'))$('inst').hidden=false;});
+$('instB').onclick=function(){if(dp){dp.prompt();dp=null;}$('inst').hidden=true;};
+$('instX').onclick=function(){$('inst').hidden=true;try{localStorage.setItem('aseer_inst_x','1');}catch(e){}};
+if(/iphone|ipad/i.test(navigator.userAgent)&&!window.navigator.standalone&&!localStorage.getItem('aseer_inst_x')){$('instT').textContent='للتثبيت: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»';$('instB').hidden=true;$('inst').hidden=false;}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+
+/* ---------- البدء: حفظ بيانات الدخول محليًا ---------- */
+var sv=null;try{sv=JSON.parse(localStorage.getItem('aseer_stu')||'null');}catch(e){}
+if(sv&&sv.phone&&sv.code)login(sv.phone,sv.code,true);else showLogin();
+})();
+</script>
+</body>
+</html>
