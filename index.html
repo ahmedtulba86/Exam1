@@ -11527,7 +11527,7 @@ function loadData(){
   var ex=D.ex.filter(function(e){return e.id===id;})[0];D.cur=ex;
   return Promise.all([
     api('GET','questions?select=id,topic_id,correct,image_path&id=in.('+(ex.question_ids||[]).join(',')+')&limit=2000'),
-    api('GET','attempts?select=id,student_id,answers,score,total,tab_leaves,submitted_at,work_photos&exam_id=eq.'+id+'&order=started_at.asc&limit=3000'),
+    api('GET','attempts?select=id,student_id,answers,score,total,tab_leaves,submitted_at,work_photos_count&exam_id=eq.'+id+'&order=started_at.asc&limit=3000'),
     api('GET','exam_students?select=student_id,phone,parent_phone,group_name&limit=5000'),
     api('GET','topics?select=id,name&limit=1000')
   ]).then(function(a){
@@ -11631,11 +11631,12 @@ function syncGroups(){var S=st().students||[],n=0,f=0,o=$('jx3Out');o.textConten
     api('PATCH','exam_students?student_id=eq.'+encodeURIComponent(S[i].id),{group_name:S[i].group||null},'return=minimal').then(function(){n++;}).catch(function(){f++;}).then(function(){nx(i+1);});})(0);}
 /* أوراق الحل */
 function photos(){
-  var L=D.rows.filter(function(r){return r.at;});
-  $('jx3Out').innerHTML=L.length?L.map(function(r){var a=D.att.filter(function(x){return x.student_id===r.id&&x.work_photos&&x.work_photos.length;}).pop(),n=a?a.work_photos.length:0;
+  var L=D.rows.filter(function(r){return r.at;}),last=function(sid){return D.att.filter(function(x){return x.student_id===sid&&x.work_photos_count>0;}).pop();};
+  $('jx3Out').innerHTML=L.length?L.map(function(r){var a=last(r.id),n=a?a.work_photos_count:0;
     return '<div style="display:flex;gap:8px;align-items:center;border-top:1px solid #e2e8f0;padding:6px 0"><span style="flex:1">'+esc(r.name)+' — '+Math.round(r.p)+'%</span><button type="button" data-s="'+esc(r.id)+'" '+(n?'':'disabled')+'>أوراق الحل ('+n+')</button></div>';}).join(''):'لا توجد تسليمات.';
-  $('jx3Out').onclick=function(e){var b=e.target.closest('button[data-s]');if(!b)return;var a=D.att.filter(function(x){return x.student_id===b.dataset.s&&x.work_photos&&x.work_photos.length;}).pop();if(!a)return;
-    var d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:100000;background:#000d;overflow:auto;padding:12px;direction:rtl';d.innerHTML='<button type="button" id="phX" style="position:sticky;top:0">✖ إغلاق</button>'+a.work_photos.map(function(p){return '<img src="'+p+'" style="width:100%;max-width:900px;display:block;margin:10px auto;background:#fff;border-radius:8px">';}).join('');document.body.appendChild(d);d.querySelector('#phX').onclick=function(){d.remove();};};}
+  $('jx3Out').onclick=function(e){var b=e.target.closest('button[data-s]');if(!b)return;var a=last(b.dataset.s);if(!a)return;b.textContent='جارٍ التحميل...';
+    api('GET','attempts?select=work_photos&id=eq.'+a.id).then(function(r){var ph=(r[0]&&r[0].work_photos)||[];b.textContent='أوراق الحل ('+ph.length+')';
+      var d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:100000;background:#000d;overflow:auto;padding:12px;direction:rtl';d.innerHTML='<button type="button" id="phX" style="position:sticky;top:0">✖ إغلاق</button>'+ph.map(function(p){return '<img src="'+p+'" style="width:100%;max-width:900px;display:block;margin:10px auto;background:#fff;border-radius:8px">';}).join('');document.body.appendChild(d);d.querySelector('#phX').onclick=function(){d.remove();};}).catch(function(er){b.textContent='أوراق الحل';alert(er.message);});};}
 function place(){
   var w=$('jx3Wrap'),qr=$('qcRoot'),qt=$('qcTab'),vis=qt&&qt.offsetParent!==null&&qr&&qr.children.length;
   if(vis){var pb=$('qcQuickPatchBar'),ref=(pb&&pb.parentNode===qr)?pb.nextSibling:qr.firstChild;

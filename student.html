@@ -99,7 +99,7 @@ function drawExam(title){
   o.innerHTML='<div id="timer">--:--</div><div class="wrap"><h3>'+esc(title)+'</h3><div id="qs">'+X.qs.map(function(q,i){return '<div class="card"><b>سؤال '+(i+1)+'</b><img class="qi" src="'+img(q.img)+'" alt=""><div class="opt" data-q="'+q.id+'">'+['a','b','c','d'].map(function(k){return '<button data-k="'+k+'" class="'+(X.ans[q.id]===k?'s':'')+'">'+AR[k]+'</button>';}).join('')+'</div></div>';}).join('')+'</div>'+
   '<div class="card" id="ph" '+(X.e.require_work_photos?'':'hidden')+'><b>📸 تصوير ورقة الحل</b><p style="font-size:13px;color:#64748b">صوّر ورقة الحل (من 1 إلى 5 صور) قبل التسليم.</p><input id="pf" type="file" accept="image/*" capture="environment" multiple><div id="pv" class="row"></div></div>'+
   '<button class="ok" id="sb" style="width:100%;margin-bottom:30px">✅ تسليم الاختبار</button></div>';
-  o.onclick=function(ev){var b=ev.target.closest('.opt button');if(!b)return;var q=b.parentNode.dataset.q;X.ans[q]=b.dataset.k;[].forEach.call(b.parentNode.children,function(x){x.classList.toggle('s',x===b);});clearTimeout(X.sv);X.sv=setTimeout(save,700);};
+  o.onclick=function(ev){var b=ev.target.closest('.opt button');if(!b||!X||X.done)return;var q=b.parentNode.dataset.q;X.ans[q]=b.dataset.k;[].forEach.call(b.parentNode.children,function(x){x.classList.toggle('s',x===b);});clearTimeout(X.sv);X.sv=setTimeout(save,700);};
   $('pf').onchange=function(){var fs=[].slice.call(this.files);this.value='';(function nx(){var f=fs.shift();if(!f)return;if(X.photos.length>=5){alert('الحد الأقصى 5 صور');return;}comp(f).then(function(d){X.photos.push(d);pv();nx();});})();};
   $('sb').onclick=function(){submit(false);};
   X.t=setInterval(tick,1000);tick();
@@ -116,7 +116,7 @@ function submit(auto){
   rpc('exam_submit_v3',cr({p_attempt:X.a,p_answers:X.ans,p_leaves:X.leaves,p_photos:X.photos.length?X.photos:null})).then(function(r){result(r);}).catch(function(e){X.done=false;X.t=setInterval(tick,1000);$('sb').disabled=false;alert(e.message);});
 }
 function result(r){
-  var o=$('run'),s=r.score!=null?r.score:null,t=r.total,p=s!=null?pc(s,t):null;
+  var o=$('run'),s=r.score!=null?r.score:null,t=r.total,p=s!=null?pc(s,t):null;o.onclick=null;
   o.innerHTML='<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:50px">'+(p==null?'✅':p>=85?'🏆':'📘')+'</div><h2>تم التسليم</h2>'+(p!=null?'<div style="font-size:38px;font-weight:800;color:var(--primary)">'+s+' / '+t+'</div><div>'+p+'%</div>':'<p>تم تسليم اختبارك بنجاح.</p>')+'<div id="cb"></div><button id="rc" style="margin-top:12px;width:100%">رجوع</button></div></div>';
   if(p!=null&&p>=85){$('cb').innerHTML='<button class="pur" id="cd" style="margin-top:10px">🎓 تحميل شهادة التقدير</button>';$('cd').onclick=function(){cert(C.name,X.e.title,p);};}
   $('rc').onclick=function(){o.hidden=true;X=null;tab('new');};
@@ -160,7 +160,7 @@ function drawMis(by){
   [].forEach.call($('main').querySelectorAll('[data-v]'),function(b){b.onclick=function(){play(m.weak[+b.dataset.v].video,m.weak[+b.dataset.v].topic);};});
 }
 function practice(){
-  var Q=MS.mistakes.slice().sort(function(){return Math.random()-.5;}),i=0,ok=0,o=$('run');o.hidden=false;
+  var Q=MS.mistakes.slice().sort(function(){return Math.random()-.5;}),i=0,ok=0,o=$('run');o.hidden=false;o.onclick=null;
   function show(){
     if(i>=Q.length){o.innerHTML='<div class="wrap"><div class="card" style="text-align:center"><h2>انتهى التدريب 🎉</h2><div style="font-size:30px">'+ok+' / '+Q.length+'</div><button id="px" style="width:100%;margin-top:10px">إغلاق</button></div></div>';$('px').onclick=function(){o.hidden=true;};return;}
     var q=Q[i];o.innerHTML='<div class="wrap"><div class="row"><b class="sp">تدريب '+(i+1)+' / '+Q.length+'</b><button class="sec" id="px">إنهاء</button></div><div class="card"><span class="pill">'+esc(q.topic||'')+'</span><img class="qi" src="'+img(q.img)+'"><div class="opt">'+['a','b','c','d'].map(function(k){return '<button data-k="'+k+'">'+AR[k]+'</button>';}).join('')+'</div><div id="fb" style="margin-top:10px;font-weight:700"></div></div></div>';
